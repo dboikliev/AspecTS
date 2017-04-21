@@ -1,9 +1,3 @@
-# AspecTS
-An AOP library implemented in TypeScript
-
-## Example:
-
-```typescript
 import { aspect, AspectBase } from "./aspect";
 
 class TestAspect extends AspectBase {
@@ -29,12 +23,3 @@ class Test {
 
 let test = new Test();
 test.ala();
-```
-
-## Result:
-
-```
-On Entry.
-In ala.
-On Exit.
-```
