@@ -1,10 +1,5 @@
 type AspectConstructor = { new(...args): AspectBase };
 
-export class Metadata {
-    args: any[];
-    returnValue: any;
-}
-
 export interface AspectBase {
     overload(func: Function): Function;
 }
@@ -43,6 +38,18 @@ export abstract class ErrorAspect implements AspectBase {
     }
 }
 
+export abstract class SurroundAspect implements AspectBase {
+    abstract onInvoke(func: Function): Function;
+
+    overload(func: Function): Function {
+        let onInvoke = this.onInvoke.bind(this);
+        return function (...args) {
+            console.log(this);
+            return onInvoke(func).apply(this, args);
+        };
+    }
+}
+
 export function aspect(aspectObject: AspectBase) {
     return function (...args) {
         if (args.length === 1) {
@@ -67,7 +74,7 @@ function classAspect(target: Function, aspectObject: AspectBase) {
     for (let key in target.prototype) {
         if (target.prototype[key] instanceof Function) {
             let original = target.prototype[key];
-            target.prototype[key] =  aspectObject.overload(original.bind(target.prototype));
+            target.prototype[key] =  aspectObject.overload(original);
         }
     }
 }

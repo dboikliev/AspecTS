@@ -1,4 +1,4 @@
-import { aspect, BoundaryAspect } from "./aspect";
+import { aspect, BoundaryAspect, ErrorAspect, SurroundAspect } from "./aspect";
 
 class TestAspect extends BoundaryAspect {
     onEntry(...args) {
@@ -13,11 +13,30 @@ class TestAspect extends BoundaryAspect {
     }
 }
 
+class LoggerAspect extends ErrorAspect {
+    onError(error) {
+        console.log(error.message);
+    }
+}
+
+class Surround extends SurroundAspect {
+    onInvoke(func: Function): Function {
+        return function (...args) {
+            console.log("YOU ARE");
+            func.apply(this, args);
+            console.log("SURROUNDED");
+        };
+    }
+}
+
+@aspect(new TestAspect())
 class Test {
-    @aspect(new TestAspect())
+    someVal = 5;
+
+    @aspect(new LoggerAspect())
+    @aspect(new Surround())
     ala(test) {
-        console.log(test);
-        return "In ala.";
+        console.log(this.someVal);
     }
 
     bala() {
