@@ -4,9 +4,9 @@ An AOP library implemented in TypeScript
 ### Example:
 
 ```typescript
-import { aspect, AspectBase } from "./aspect";
+import { aspect, BoundaryAspect } from "./aspect";
 
-class TestAspect extends AspectBase {
+class TestAspect extends BoundaryAspect {
     onEntry(...args) {
         console.log("On Entry.");
         args[0] = 10;
@@ -20,7 +20,7 @@ class TestAspect extends AspectBase {
 }
 
 class Test {
-    @aspect(TestAspect)
+    @aspect(new TestAspect())
     ala(test) {
         console.log(test);
         return "In ala.";

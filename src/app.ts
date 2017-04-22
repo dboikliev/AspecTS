@@ -1,22 +1,29 @@
-import { aspect, BoundaryAspect, ErrorAspect } from "./aspect";
+import { aspect, BoundaryAspect } from "./aspect";
 
-class ErrorLogger extends ErrorAspect {
-    constructor(private file: string) {
-        super();
+class TestAspect extends BoundaryAspect {
+    onEntry(...args) {
+        console.log("On Entry.");
+        args[0] = 10;
+        return args;
     }
 
-    onError(error: Error) {
-        console.log(`Logged error: ${error.message} \nLocation: ${this.file}`);
+    onExit(returnValue) {
+        console.log("On Exit.");
+        return returnValue + 5;
     }
 }
 
 class Test {
-    someVal = 5;
+    @aspect(new TestAspect())
+    ala(test) {
+        console.log(test);
+        return "In ala.";
+    }
 
-    @aspect(new ErrorLogger("D:\\logs\\"))
-    do(arg) {
-        throw Error("Some error.");
+    bala() {
+        console.log("In bala.");
     }
 }
 
-new Test().do(1);
+let test = new Test();
+console.log(test.ala(1));
