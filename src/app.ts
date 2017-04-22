@@ -9,7 +9,7 @@ class TestAspect extends BoundaryAspect {
 
     onExit(returnValue) {
         console.log("On Exit.");
-        return returnValue + 5;
+        return returnValue - 5;
     }
 }
 
@@ -20,10 +20,12 @@ class ErrorLogger extends ErrorAspect {
 }
 
 class Test {
-    @aspect(ErrorLogger)
-    do() {
-        throw Error("An error occured while doing something.");
+    someVal = 5;
+
+    @aspect(TestAspect)
+    @aspect(TestAspect)
+    do(arg) {
+        return "wat";
     }
 }
-
-new Test().do()
+console.log(new Test().do(1));
