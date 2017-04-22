@@ -1,19 +1,23 @@
 import { aspect, AspectBase } from "./aspect";
 
 class TestAspect extends AspectBase {
-    onEntry() {
+    onEntry(...args) {
         console.log("On Entry.");
+        args[0] = 10;
+        return args;
     }
 
-    onExit() {
+    onExit(returnValue) {
         console.log("On Exit.");
+        return returnValue + 5;
     }
 }
 
 class Test {
     @aspect(TestAspect)
-    ala() {
-        console.log("In ala.");
+    ala(test) {
+        console.log(test);
+        return "In ala.";
     }
 
     bala() {
@@ -22,4 +26,4 @@ class Test {
 }
 
 let test = new Test();
-test.ala();
+console.log(test.ala(1));
