@@ -1,4 +1,4 @@
-type Aspect = { new(...args): AspectBase };
+type AspectConstructor = { new(...args): AspectBase };
 
 export class Metadata {
     args: any[];
@@ -43,10 +43,9 @@ export abstract class ErrorAspect implements AspectBase {
     }
 }
 
-export function aspect(type: Aspect, ...args) {
+export function aspect(aspectObject: AspectBase) {
     return function (...args) {
         if (args.length === 1) {
-            let aspectObject = new type(...args);
             classAspect.call(this, ...args, aspectObject);
         }
         else if (args.length === 2) {
@@ -56,7 +55,6 @@ export function aspect(type: Aspect, ...args) {
             if (args[2] === "number") {
                 throw Error("Cannot use aspect on parameters.");
             }
-            let aspectObject = new type(...args);
             functionAspect.call(this, ...args, aspectObject);
         }
         else {
