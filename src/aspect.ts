@@ -1,13 +1,11 @@
 type Aspect = { new(...args): AspectBase };
 
 export class AspectBase {
-    constructor() {}
-
-    onEntry(...args): any[] {
+    onEntry(...args) {
         return args;
     }
 
-    onExit(returnValue): any {
+    onExit(returnValue) {
         return returnValue;
     }
 }
