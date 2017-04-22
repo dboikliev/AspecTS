@@ -1,12 +1,43 @@
 type Aspect = { new(...args): AspectBase };
 
-export class AspectBase {
-    onEntry(...args) {
-        return args;
-    }
+export class Metadata {
+    args: any[];
+    returnValue: any;
+}
 
-    onExit(returnValue) {
-        return returnValue;
+export interface AspectBase {
+    overload(func: Function): Function;
+}
+
+export abstract class BoundaryAspect implements AspectBase {
+    abstract onEntry(...args): any[]
+
+    abstract onExit(returnValue): any
+
+    overload(func: Function): Function {
+        return (...args) => {
+            let passThroughArgs = this.onEntry(...args);
+            let returnValue = func(...passThroughArgs);
+            let passThroughReturnValue = this.onExit(returnValue);
+            return passThroughReturnValue;
+        };
+    }
+}
+
+export abstract class ErrorAspect implements AspectBase {
+    abstract onError(error: any);
+
+    overload(func: Function): Function {
+        return (...args) => {
+            try
+            {
+                return func(args);
+            }
+            catch (e)
+            {
+                this.onError(e);
+            }
+        };
     }
 }
 
@@ -34,8 +65,8 @@ function classAspect(target: Function, type: Aspect) {
     for (let key in target.prototype) {
         if (target.prototype[key] instanceof Function) {
             let original = target.prototype[key];
-            let aspectObject = new type();
-            target.prototype[key] =  overloadFunction(aspectObject, original);
+            let aspectObject: AspectBase = new type();
+            target.prototype[key] =  aspectObject.overload(original);
         }
     }
 }
@@ -43,15 +74,6 @@ function classAspect(target: Function, type: Aspect) {
 function functionAspect(target: Function, key: string | symbol, descriptor: PropertyDescriptor, type: Aspect) {
     let original = descriptor.value;
     let aspectObject = new type();
-    descriptor.value = overloadFunction(aspectObject, original);
+    descriptor.value = aspectObject.overload(original);
     return descriptor;
 }
-
-function overloadFunction(aspect: AspectBase, original: Function) {
-    return function(...args) {
-        let passThroughArgs = aspect.onEntry(...args);
-        let returnValue = original(...passThroughArgs);
-        let passThroughReturnValue = aspect.onExit(returnValue);
-        return passThroughReturnValue;
-    };
-} 

@@ -1,6 +1,6 @@
-import { aspect, AspectBase } from "./aspect";
+import { aspect, BoundaryAspect, ErrorAspect } from "./aspect";
 
-class TestAspect extends AspectBase {
+class TestAspect extends BoundaryAspect {
     onEntry(...args) {
         console.log("On Entry.");
         args[0] = 10;
@@ -13,17 +13,17 @@ class TestAspect extends AspectBase {
     }
 }
 
-class Test {
-    @aspect(TestAspect)
-    ala(test) {
-        console.log(test);
-        return "In ala.";
-    }
-
-    bala() {
-        console.log("In bala.");
+class ErrorLogger extends ErrorAspect {
+    onError(error: Error) {
+        console.log(`Logged error: ${error.message}`);
     }
 }
 
-let test = new Test();
-console.log(test.ala(1));
+class Test {
+    @aspect(ErrorLogger)
+    do() {
+        throw Error("An error occured while doing something.");
+    }
+}
+
+new Test().do()
