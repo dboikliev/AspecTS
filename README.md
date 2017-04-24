@@ -9,7 +9,7 @@ An AOP library implemented in TypeScript
 
 ### Examples:
 
-#### 1. BounaryAspect:
+#### 1. BounaryAspect:<a id="boundary"></a>
 
 The `BoundaryAspect` class provides method for intercepting the places of entry and exit of functions.
 Classes inheriting from `BoundaryAspect` can provide custom iplementations to `onEntry` and/or `onExit`.
