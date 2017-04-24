@@ -1,48 +1,23 @@
 import { aspect, BoundaryAspect, ErrorAspect, SurroundAspect } from "./aspect";
 
-class TestAspect extends BoundaryAspect {
-    onEntry(...args) {
-        console.log("On Entry.");
-        args[0] = 10;
-        return args;
-    }
-
-    onExit(returnValue) {
-        console.log("On Exit.");
-        return returnValue + 5;
-    }
-}
-
-class LoggerAspect extends ErrorAspect {
-    onError(error) {
-        console.log(error.message);
-    }
-}
-
-class Surround extends SurroundAspect {
-    onInvoke(func: Function): Function {
-        return function (...args) {
-            console.log("YOU ARE");
-            func.apply(this, args);
-            console.log("SURROUNDED");
+class TestSurroundAspect extends SurroundAspect {
+    onInvoke(func) {
+        return function(...args) {
+            console.log("You've been");
+            let returnValue = func.apply(this, args);
+            console.log("surrounded.");
+            return returnValue;
         };
     }
 }
 
-@aspect(new TestAspect())
 class Test {
-    someVal = 5;
-
-    @aspect(new LoggerAspect())
-    @aspect(new Surround())
-    ala(test) {
-        console.log(this.someVal);
-    }
-
-    bala() {
-        console.log("In bala.");
+    @aspect(new TestSurroundAspect())
+    doSomething(argument) {
+        console.log("In doSomething.");
+        return "doSomething's result.";
     }
 }
 
 let test = new Test();
-console.log(test.ala(1));
+console.log(test.doSomething(1));

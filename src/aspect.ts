@@ -44,7 +44,6 @@ export abstract class SurroundAspect implements AspectBase {
     overload(func: Function): Function {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
-            console.log(this);
             return onInvoke(func).apply(this, args);
         };
     }
