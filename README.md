@@ -17,7 +17,7 @@ The `BoundaryAspect` class provides method for intercepting the places of entry 
 Classes inheriting from `BoundaryAspect` can provide custom iplementations to `onEntry` and/or `onExit`.
 `onEntry` recieves the decorated function's arguments and must. Its return value is passed as argument(s) to the decorated function.
 `onExit` reieves the decorated function's return value. Its return value will be returned to the caller of the decorated method.
-This aspect is most suitable when you want to perform some action specifically on functio entry and/or exit.
+This aspect is most suitable when you want to perform some action specifically on function entry and/or exit.
 
 ```typescript
 import { aspect, BoundaryAspect } from "./aspect";
