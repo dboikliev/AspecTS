@@ -96,3 +96,35 @@ In doSomething.
 surrounded.
 doSomething's result.
 ```
+
+#### 3. ErrorAspect:<a id="error"></a>
+
+The ErrorAspect provides an `onError` function which is called when the decorated function throws an error.
+`onError` receives as argument the caught object which the decorated function has thrown.
+This aspect is suitable for implementing loggers and error handlers.
+
+```typescript
+import { aspect, ErrorAspect } from "./aspect";
+
+class TestErrorAspect extends ErrorAspect {
+    onError(error) {
+        console.log("LOGGED ERROR: " + (error.message ? error.message : error));
+    }
+}
+
+class Test {
+    @aspect(new TestErrorAspect())
+    doSomething() {
+        throw Error("Something went wrong while doing something.");
+    }
+}
+
+let test = new Test();
+test.doSomething();
+```
+
+#### Result:
+
+```
+LOGGED ERROR: Something went wrong while doing something.
+```

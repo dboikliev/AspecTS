@@ -1,23 +1,17 @@
-import { aspect, BoundaryAspect, ErrorAspect, SurroundAspect } from "./aspect";
+import { aspect, ErrorAspect } from "./aspect";
 
-class TestSurroundAspect extends SurroundAspect {
-    onInvoke(func) {
-        return function(...args) {
-            console.log("You've been");
-            let returnValue = func.apply(this, args);
-            console.log("surrounded.");
-            return returnValue;
-        };
+class TestErrorAspect extends ErrorAspect {
+    onError(error) {
+        console.log("LOGGED ERROR: " + (error.message ? error.message : error));
     }
 }
 
 class Test {
-    @aspect(new TestSurroundAspect())
-    doSomething(argument) {
-        console.log("In doSomething.");
-        return "doSomething's result.";
+    @aspect(new TestErrorAspect())
+    doSomething() {
+        throw Error("Something went wrong while doing something.");
     }
 }
 
 let test = new Test();
-console.log(test.doSomething(1));
+test.doSomething();
