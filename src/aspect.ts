@@ -1,5 +1,3 @@
-type AspectConstructor = { new(...args): AspectBase };
-
 export interface AspectBase {
     overload(func: Function): Function;
 }
