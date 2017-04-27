@@ -68,12 +68,12 @@ export function aspect(aspectObject: AspectBase) {
 }
 
 function classAspect(target: Function, aspectObject: AspectBase) {
-    for (let key in target.prototype) {
-        if (target.prototype[key] instanceof Function) {
+    Object.getOwnPropertyNames(target.prototype)
+        .filter(key => key !== "constructor")
+        .forEach(key => {
             let original = target.prototype[key];
             target.prototype[key] =  aspectObject.overload(original);
-        }
-    }
+        });
 }
 
 function functionAspect(target: Function, key: string | symbol, descriptor: PropertyDescriptor, aspectObject: AspectBase) {

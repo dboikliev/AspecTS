@@ -1,17 +1,34 @@
-import { aspect, ErrorAspect } from "./aspect";
+import { 
+    aspect,
+    BoundaryAspect
 
-class TestErrorAspect extends ErrorAspect {
-    onError(error) {
-        console.log("LOGGED ERROR: " + (error.message ? error.message : error));
+} from "./aspect";
+
+class TestBoundary extends BoundaryAspect {
+    onEntry(...args) {
+        console.log("dasdasda");
+        return args;
+    }
+
+    onExit(returnValue) {
+        return returnValue;
     }
 }
 
+
+
+@aspect(new TestBoundary())
 class Test {
-    @aspect(new TestErrorAspect())
-    doSomething() {
-        throw Error("Something went wrong while doing something.");
+    someVale = 15;
+
+    constructor() {
+        console.log(this.someVale);
+    }
+
+    @aspect(new TestBoundary())
+    test(...args) {
+        return 1;
     }
 }
-
 let test = new Test();
-test.doSomething();
+console.log(test.test(1));
