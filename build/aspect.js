@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const overloadKey = typeof Symbol == "function" ? Symbol() : "__overload";
+const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
 console.log(overloadKey);
 var Target;
 (function (Target) {
@@ -53,20 +53,20 @@ class SurroundAspect {
 exports.SurroundAspect = SurroundAspect;
 function aspect(aspectObject, targetFlags = Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
     return function (...args) {
-        if (args.length === 1) {
-            classAspect.call(this, ...args, aspectObject, targetFlags);
-        }
-        else if (args.length === 2) {
-            throw Error("Cannot use aspect on properties.");
-        }
-        else if (args.length === 3) {
-            if (args[2] === "number") {
-                throw Error("Cannot use aspect on parameters.");
-            }
-            functionAspect.call(this, ...args, aspectObject);
-        }
-        else {
-            throw Error("Cannot use aspect here.");
+        switch (args.length) {
+            case 1:
+                classAspect.call(this, ...args, aspectObject, targetFlags);
+                break;
+            case 2:
+                throw Error("Cannot use aspect on properties.");
+            case 3:
+                if (args[2] === "number") {
+                    throw Error("Cannot use aspect on parameters.");
+                }
+                functionAspect.call(this, ...args, aspectObject);
+                break;
+            default:
+                throw Error("Cannot use aspect here.");
         }
     };
 }
@@ -78,7 +78,7 @@ function classAspect(target, aspectObject, targetFlags) {
         if ((targetFlags & Target.InstanceAccessors) && (descriptor.get || descriptor.set)) {
             decorateAccessor(target.prototype, key, descriptor, aspectObject);
         }
-        if ((targetFlags & Target.InstanceMethods) && typeof descriptor.value == "function") {
+        if ((targetFlags & Target.InstanceMethods) && typeof descriptor.value === "function") {
             decorateProperty(target.prototype, key, descriptor, aspectObject);
         }
     });
@@ -86,7 +86,7 @@ function classAspect(target, aspectObject, targetFlags) {
         if ((targetFlags & Target.StaticAccessors) && (descriptor.get || descriptor.set) && descriptor.configurable) {
             decorateAccessor(target, key, descriptor, aspectObject);
         }
-        if ((targetFlags & Target.StaticMethods) && typeof descriptor.value == "function") {
+        if ((targetFlags & Target.StaticMethods) && typeof descriptor.value === "function") {
             decorateProperty(target, key, descriptor, aspectObject);
         }
     });

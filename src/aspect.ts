@@ -1,6 +1,6 @@
 declare const Symbol: any;
 
-const overloadKey = typeof Symbol == "function" ? Symbol() : "__overload";
+const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
 console.log(overloadKey);
 
 export enum Target {
@@ -63,33 +63,33 @@ export abstract class SurroundAspect implements AspectBase {
 
 export function aspect(aspectObject: AspectBase, targetFlags: number = Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
     return function (...args) {
-        if (args.length === 1) {
-            classAspect.call(this, ...args, aspectObject, targetFlags);
-        }
-        else if (args.length === 2) {
-            throw Error("Cannot use aspect on properties.");
-        }
-        else if (args.length === 3) {
-            if (args[2] === "number") {
-                throw Error("Cannot use aspect on parameters.");
-            }
-            functionAspect.call(this, ...args, aspectObject);
-        }
-        else {
-            throw Error("Cannot use aspect here.");
+        switch (args.length) {
+            case 1:
+                classAspect.call(this, ...args, aspectObject, targetFlags);
+                break;
+            case 2:
+                throw Error("Cannot use aspect on properties.");
+            case 3:
+                if (args[2] === "number") {
+                    throw Error("Cannot use aspect on parameters.");
+                }
+                functionAspect.call(this, ...args, aspectObject);
+                break;
+            default:
+                throw Error("Cannot use aspect here.");
         }
     };
 }
 
 function classAspect(target: Function, aspectObject: AspectBase, targetFlags: number) {
-    let instanceDescriptors = getDescriptors(target.prototype, aspectObject)
+    let instanceDescriptors = getDescriptors(target.prototype, aspectObject);
     let staticDescriptors = getDescriptors(target, aspectObject);
     instanceDescriptors.forEach(({ key, descriptor }) => {
         if ((targetFlags & Target.InstanceAccessors) && (descriptor.get || descriptor.set)) {
             decorateAccessor(target.prototype, key, descriptor, aspectObject);
         }
 
-        if ((targetFlags & Target.InstanceMethods) && typeof descriptor.value == "function") {
+        if ((targetFlags & Target.InstanceMethods) && typeof descriptor.value === "function") {
             decorateProperty(target.prototype, key, descriptor, aspectObject);
         }
     });
@@ -99,7 +99,7 @@ function classAspect(target: Function, aspectObject: AspectBase, targetFlags: nu
             decorateAccessor(target, key, descriptor, aspectObject);
         }
 
-        if ((targetFlags & Target.StaticMethods) && typeof descriptor.value == "function") {
+        if ((targetFlags & Target.StaticMethods) && typeof descriptor.value === "function") {
             decorateProperty(target, key, descriptor, aspectObject);
         }
     });
@@ -125,7 +125,7 @@ function decorateProperty(target: Function, key: string, descriptor: PropertyDes
 function getDescriptors(target: any, aspectObject: AspectBase) {
     return Object.getOwnPropertyNames(target)
         .filter(key => key !== "constructor")
-        .map(key => ({ key: key, descriptor: Object.getOwnPropertyDescriptor(target, key) }))
+        .map(key => ({ key: key, descriptor: Object.getOwnPropertyDescriptor(target, key) }));
 }
 
 function functionAspect(target: Function, key: string | symbol, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
