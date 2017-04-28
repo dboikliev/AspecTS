@@ -1,22 +1,43 @@
 import { 
     aspect,
     BoundaryAspect,
-    Target
+    Target,
+    surround,
+    boundary,
+    error
 } from "./aspect";
 
-class TestBoundary extends BoundaryAspect {
+
+class SomeBase {
+}
+
+class Bla extends error(surround(boundary(SomeBase))) {
+    onError(e) {
+        console.log("Error: " + e.message);
+    }
+
     onEntry(...args) {
-        console.log("dasdasda");
+        // console.log(args);
         return args;
     }
 
     onExit(returnValue) {
+        // console.log(returnValue);
         return returnValue;
+    }
+
+    onInvoke(func) {
+        return function (...args) {
+            console.log("you've been");
+            // console.log(func.toString());
+            let result = func.apply(this, args);
+            console.log("surrounded");
+            return result;
+        };
     }
 }
 
 
-@aspect(new TestBoundary(), Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors)
 class TestClass {
     private _testField: number;
     private static _testStaticField: number;
@@ -29,6 +50,7 @@ class TestClass {
         this._testField = value;
     }
 
+    @aspect(new Bla())
     instanceMethod(testParameter: number) {
         return testParameter;
     }
@@ -50,5 +72,4 @@ class TestClass {
 let instance = new TestClass();
 // instance.instanceAccessor = 2;
 // console.log(instance.instanceAccessor);
-console.log(TestClass.staticMethod(1));
-console.log(instance.instanceMethod(1));
+instance.instanceMethod(1);

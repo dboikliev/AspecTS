@@ -1,7 +1,6 @@
 declare const Symbol: any;
 
 const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
-console.log(overloadKey);
 
 export enum Target {
     InstanceMethods = 1,
@@ -37,7 +36,7 @@ export abstract class BoundaryAspect implements AspectBase {
 export abstract class ErrorAspect implements AspectBase {
     abstract onError(error: any);
 
-    overload(func: (...args) => any): (...args) => any {
+    [overloadKey](func: (...args) => any): (...args) => any {
         let onError = this.onError.bind(this);
         return function (...args) {
             try {
@@ -53,7 +52,7 @@ export abstract class ErrorAspect implements AspectBase {
 export abstract class SurroundAspect implements AspectBase {
     abstract onInvoke(func: Function): Function;
 
-    overload(func: (...args) => any): (...args) => any {
+    [overloadKey](func: (...args) => any): (...args) => any {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
             return onInvoke(func).apply(this, args);
@@ -137,4 +136,61 @@ function functionAspect(target: Function, key: string | symbol, descriptor: Prop
         descriptor.value =  aspectObject[overloadKey](descriptor.value);
     }
     return descriptor;
+}
+
+export interface Constructable<T> {
+    new(...args): T;
+}
+
+export interface Base { }
+
+export function error<T extends Base>(base: Constructable<T>): Constructable<ErrorAspect & T>  {
+    let extended =  class extends (base as Constructable<Base>) {
+    };
+
+    applyMixins(extended, ErrorAspect);
+     extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
+         
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
+        //   console.log(bound().toString());
+        return bound();
+    }
+    return extended as any;
+}
+
+
+export function surround<T extends Base>(base: Constructable<T>): Constructable<SurroundAspect & T> {
+    let extended =  class extends (base as Constructable<Base>) {
+    };
+
+    applyMixins(extended, SurroundAspect);
+    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        // console.log(f.toString());
+        let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
+            // console.log(bound().toString());
+        return bound();
+    }
+    return extended as any;
+}
+
+export function boundary<T extends Base>(base: Constructable<T>): Constructable<BoundaryAspect & T> {
+    let extended =  class extends (base as Constructable<Base>) {
+    };
+
+    applyMixins(extended, BoundaryAspect);
+    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
+        // console.log(bound().toString());
+        return bound();
+    };
+    return extended as any;
+}
+
+function applyMixins(targetClass: Function, mixin: Function) {
+    Object.getOwnPropertyNames(mixin.prototype).forEach(prop => {
+        targetClass.prototype[prop] = mixin.prototype[prop];
+    });
 }

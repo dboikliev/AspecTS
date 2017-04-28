@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
-console.log(overloadKey);
 var Target;
 (function (Target) {
     Target[Target["InstanceMethods"] = 1] = "InstanceMethods";
@@ -29,7 +28,7 @@ class BoundaryAspect {
 }
 exports.BoundaryAspect = BoundaryAspect;
 class ErrorAspect {
-    overload(func) {
+    [overloadKey](func) {
         let onError = this.onError.bind(this);
         return function (...args) {
             try {
@@ -43,7 +42,7 @@ class ErrorAspect {
 }
 exports.ErrorAspect = ErrorAspect;
 class SurroundAspect {
-    overload(func) {
+    [overloadKey](func) {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
             return onInvoke(func).apply(this, args);
@@ -120,5 +119,50 @@ function functionAspect(target, key, descriptor, aspectObject) {
         descriptor.value = aspectObject[overloadKey](descriptor.value);
     }
     return descriptor;
+}
+function error(base) {
+    let extended = class extends base {
+    };
+    applyMixins(extended, ErrorAspect);
+    extended.prototype[overloadKey] = function (func) {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
+        //   console.log(bound().toString());
+        return bound();
+    };
+    return extended;
+}
+exports.error = error;
+function surround(base) {
+    let extended = class extends base {
+    };
+    applyMixins(extended, SurroundAspect);
+    extended.prototype[overloadKey] = function (func) {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        // console.log(f.toString());
+        let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
+        // console.log(bound().toString());
+        return bound();
+    };
+    return extended;
+}
+exports.surround = surround;
+function boundary(base) {
+    let extended = class extends base {
+    };
+    applyMixins(extended, BoundaryAspect);
+    extended.prototype[overloadKey] = function (func) {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
+        // console.log(bound().toString());
+        return bound();
+    };
+    return extended;
+}
+exports.boundary = boundary;
+function applyMixins(targetClass, mixin) {
+    Object.getOwnPropertyNames(mixin.prototype).forEach(prop => {
+        targetClass.prototype[prop] = mixin.prototype[prop];
+    });
 }
 //# sourceMappingURL=aspect.js.map
