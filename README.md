@@ -15,7 +15,7 @@ An [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_p
 
 The `BoundaryAspect` class provides method for intercepting the places of entry and exit of functions.
 Classes inheriting from `BoundaryAspect` can provide custom iplementations to `onEntry` and/or `onExit`.
-`onEntry` recieves the decorated function's arguments and must. Its return value is passed as argument(s) to the decorated function.
+`onEntry` recieves the decorated function's arguments. Its return value is passed as argument(s) to the decorated function.
 `onExit` reieves the decorated function's return value. Its return value will be returned to the caller of the decorated method.
 This aspect is most suitable when you want to perform some action specifically on function entry and/or exit.
 
