@@ -1,3 +1,8 @@
+declare const Symbol: any;
+
+const overloadKey = typeof Symbol == "function" ? Symbol() : "__overload";
+console.log(overloadKey);
+
 export enum Target {
     InstanceMethods = 1,
     InstanceAccessors = 1 << 1,
@@ -5,8 +10,10 @@ export enum Target {
     StaticAccessors = 1 << 3
 }
 
-export interface AspectBase {
-    overload(func: (...args) => any): (...args) => any;
+export abstract class AspectBase {
+    protected [overloadKey](func: (...args) => any): (...args) => any {
+        return func;
+    }
 }
 
 export abstract class BoundaryAspect implements AspectBase {
@@ -14,7 +21,7 @@ export abstract class BoundaryAspect implements AspectBase {
 
     abstract onExit(returnValue): any
 
-    overload(func: (...args) => any): (...args) => any {
+    [overloadKey](func: (...args) => any): (...args) => any {
         let onEntry = this.onEntry.bind(this);
         let onExit = this.onExit.bind(this);
 
@@ -88,7 +95,7 @@ function classAspect(target: Function, aspectObject: AspectBase, targetFlags: nu
     });
 
     staticDescriptors.forEach(({ key, descriptor }) => {
-        if ((targetFlags & Target.StaticAccessors) && (descriptor.get || descriptor.set)) {
+        if ((targetFlags & Target.StaticAccessors) && (descriptor.get || descriptor.set) && descriptor.configurable) {
             decorateAccessor(target, key, descriptor, aspectObject);
         }
 
@@ -100,8 +107,8 @@ function classAspect(target: Function, aspectObject: AspectBase, targetFlags: nu
 
 function decorateAccessor(target: Function, key: string, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
     Object.defineProperty(target, key, {
-        get: descriptor.get ? aspectObject.overload(descriptor.get) : undefined,
-        set: descriptor.set ? aspectObject.overload(descriptor.set) : undefined,
+        get: descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined,
+        set: descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined,
         enumerable: descriptor.enumerable,
         configurable: descriptor.configurable,
     });
@@ -109,7 +116,7 @@ function decorateAccessor(target: Function, key: string, descriptor: PropertyDes
 
 function decorateProperty(target: Function, key: string, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
     Object.defineProperty(target, key, {
-        value: aspectObject.overload(descriptor.value),
+        value: aspectObject[overloadKey](descriptor.value),
         enumerable: descriptor.enumerable,
         configurable: descriptor.configurable,
     });
@@ -123,11 +130,11 @@ function getDescriptors(target: any, aspectObject: AspectBase) {
 
 function functionAspect(target: Function, key: string | symbol, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
     if (descriptor.get || descriptor.set) {
-        descriptor.get = descriptor.get ? aspectObject.overload(descriptor.get) : undefined;
-        descriptor.set = descriptor.set ? aspectObject.overload(descriptor.set) : undefined;
+        descriptor.get = descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined;
+        descriptor.set = descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined;
     }
     else if (descriptor.value) {
-        descriptor.value =  aspectObject.overload(descriptor.value);
+        descriptor.value =  aspectObject[overloadKey](descriptor.value);
     }
     return descriptor;
 }

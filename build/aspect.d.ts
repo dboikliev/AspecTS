@@ -4,13 +4,11 @@ export declare enum Target {
     StaticMethods = 4,
     StaticAccessors = 8,
 }
-export interface AspectBase {
-    overload(func: (...args) => any): (...args) => any;
+export declare abstract class AspectBase {
 }
 export declare abstract class BoundaryAspect implements AspectBase {
     abstract onEntry(...args: any[]): any[];
     abstract onExit(returnValue: any): any;
-    overload(func: (...args) => any): (...args) => any;
 }
 export declare abstract class ErrorAspect implements AspectBase {
     abstract onError(error: any): any;
