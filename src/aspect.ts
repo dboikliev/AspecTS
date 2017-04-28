@@ -54,7 +54,6 @@ export abstract class SurroundAspect implements AspectBase {
     }
 }
 
-export function aspect(aspectObject: AspectBase, targetFlags?: number)
 export function aspect(aspectObject: AspectBase, targetFlags: number = Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
     return function (...args) {
         if (args.length === 1) {

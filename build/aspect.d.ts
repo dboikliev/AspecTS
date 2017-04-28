@@ -20,4 +20,4 @@ export declare abstract class SurroundAspect implements AspectBase {
     abstract onInvoke(func: Function): Function;
     overload(func: (...args) => any): (...args) => any;
 }
-export declare function aspect(aspectObject: AspectBase, targetFlags?: number): any;
+export declare function aspect(aspectObject: AspectBase, targetFlags?: number): (...args: any[]) => void;
