@@ -1,5 +1,12 @@
+export enum Target {
+    InstanceMethods = 1,
+    InstanceAccessors = 1 << 1,
+    StaticMethods = 1 << 2,
+    StaticAccessors = 1 << 3
+}
+
 export interface AspectBase {
-    overload(func: Function): Function;
+    overload(func: (...args) => any): (...args) => any;
 }
 
 export abstract class BoundaryAspect implements AspectBase {
@@ -7,7 +14,7 @@ export abstract class BoundaryAspect implements AspectBase {
 
     abstract onExit(returnValue): any
 
-    overload(func: Function): Function {
+    overload(func: (...args) => any): (...args) => any {
         let onEntry = this.onEntry.bind(this);
         let onExit = this.onExit.bind(this);
 
@@ -23,7 +30,7 @@ export abstract class BoundaryAspect implements AspectBase {
 export abstract class ErrorAspect implements AspectBase {
     abstract onError(error: any);
 
-    overload(func: Function): Function {
+    overload(func: (...args) => any): (...args) => any {
         let onError = this.onError.bind(this);
         return function (...args) {
             try {
@@ -39,7 +46,7 @@ export abstract class ErrorAspect implements AspectBase {
 export abstract class SurroundAspect implements AspectBase {
     abstract onInvoke(func: Function): Function;
 
-    overload(func: Function): Function {
+    overload(func: (...args) => any): (...args) => any {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
             return onInvoke(func).apply(this, args);
@@ -47,10 +54,11 @@ export abstract class SurroundAspect implements AspectBase {
     }
 }
 
-export function aspect(aspectObject: AspectBase) {
+export function aspect(aspectObject: AspectBase, targetFlags?: number)
+export function aspect(aspectObject: AspectBase, targetFlags: number = Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
     return function (...args) {
         if (args.length === 1) {
-            classAspect.call(this, ...args, aspectObject);
+            classAspect.call(this, ...args, aspectObject, targetFlags);
         }
         else if (args.length === 2) {
             throw Error("Cannot use aspect on properties.");
@@ -67,17 +75,63 @@ export function aspect(aspectObject: AspectBase) {
     };
 }
 
-function classAspect(target: Function, aspectObject: AspectBase) {
-    Object.getOwnPropertyNames(target.prototype)
+function classAspect(target: Function, aspectObject: AspectBase, targetFlags: number) {
+    let instanceDescriptors = getDescriptors(target.prototype, aspectObject, targetFlags)
+    let staticDescriptors = getDescriptors(target, aspectObject, targetFlags);
+    instanceDescriptors.forEach(({ key, descriptor }) => {
+        if ((targetFlags & Target.InstanceAccessors) && (descriptor.get || descriptor.set)) {
+            Object.defineProperty(target.prototype, key, {
+                get: descriptor.get ? aspectObject.overload(descriptor.get) : undefined,
+                set: descriptor.set ? aspectObject.overload(descriptor.set) : undefined,
+                enumerable: descriptor.enumerable,
+                configurable: descriptor.configurable,
+            });
+        }
+
+        if ((targetFlags & Target.InstanceMethods) && typeof descriptor.value == "function") {
+            Object.defineProperty(target.prototype, key, {
+                value: aspectObject.overload(descriptor.value),
+                enumerable: descriptor.enumerable,
+                configurable: descriptor.configurable,
+                writable: descriptor.writable
+            });
+        }
+    });
+
+    staticDescriptors.forEach(({ key, descriptor }) => {
+        if ((targetFlags & Target.StaticAccessors) && (descriptor.get || descriptor.set)) {
+            Object.defineProperty(target, key, {
+                get: descriptor.get ? aspectObject.overload(descriptor.get) : undefined,
+                set: descriptor.set ? aspectObject.overload(descriptor.set) : undefined,
+                enumerable: descriptor.enumerable,
+                configurable: descriptor.configurable,
+            });
+        }
+
+        if ((targetFlags & Target.StaticMethods) && typeof descriptor.value == "function") {
+            Object.defineProperty(target, key, {
+                value: aspectObject.overload(descriptor.value),
+                enumerable: descriptor.enumerable,
+                configurable: descriptor.configurable,
+                writable: descriptor.writable
+            });
+        }
+    });
+}
+
+function getDescriptors(target: any, aspectObject: AspectBase, targetFlags: number) {
+    return Object.getOwnPropertyNames(target)
         .filter(key => key !== "constructor")
-        .forEach(key => {
-            let original = target.prototype[key];
-            target.prototype[key] =  aspectObject.overload(original);
-        });
+        .map(key => ({ key: key, descriptor: Object.getOwnPropertyDescriptor(target, key) }))
 }
 
 function functionAspect(target: Function, key: string | symbol, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
-    let original = descriptor.value;
-    descriptor.value = aspectObject.overload(original);
+    if (descriptor.get || descriptor.set) {
+        descriptor.get = descriptor.get ? aspectObject.overload(descriptor.get) : undefined;
+        descriptor.set = descriptor.set ? aspectObject.overload(descriptor.set) : undefined;
+    }
+    else if (descriptor.value) {
+        descriptor.value =  aspectObject.overload(descriptor.value);
+    }
     return descriptor;
 }

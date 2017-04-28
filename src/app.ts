@@ -1,7 +1,7 @@
 import { 
     aspect,
-    BoundaryAspect
-
+    BoundaryAspect,
+    Target
 } from "./aspect";
 
 class TestBoundary extends BoundaryAspect {
@@ -16,19 +16,38 @@ class TestBoundary extends BoundaryAspect {
 }
 
 
+@aspect(new TestBoundary(), Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors)
+class TestClass {
+    private _testField: number;
+    private static _testStaticField: number;
 
-@aspect(new TestBoundary())
-class Test {
-    someVale = 15;
-
-    constructor() {
-        console.log(this.someVale);
+    get instanceAccessor() {
+        return this._testField;
     }
 
-    @aspect(new TestBoundary())
-    test(...args) {
-        return 1;
+    set instanceAccessor(value) {
+        this._testField = value;
+    }
+
+    instanceMethod(testParameter: number) {
+        return testParameter;
+    }
+
+    static staticMethod(testParameter: number) {
+        return testParameter;
+    }
+
+    static get staticField() {
+        return this._testStaticField;
+    }
+
+    static set staticField(value) {
+        this._testStaticField = value;
     }
 }
-let test = new Test();
-console.log(test.test(1));
+
+
+let instance = new TestClass();
+// instance.instanceAccessor = 2;
+// console.log(instance.instanceAccessor);
+console.log(TestClass.staticMethod(1));
