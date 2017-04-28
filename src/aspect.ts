@@ -76,50 +76,47 @@ export function aspect(aspectObject: AspectBase, targetFlags: number = Target.In
 }
 
 function classAspect(target: Function, aspectObject: AspectBase, targetFlags: number) {
-    let instanceDescriptors = getDescriptors(target.prototype, aspectObject, targetFlags)
-    let staticDescriptors = getDescriptors(target, aspectObject, targetFlags);
+    let instanceDescriptors = getDescriptors(target.prototype, aspectObject)
+    let staticDescriptors = getDescriptors(target, aspectObject);
     instanceDescriptors.forEach(({ key, descriptor }) => {
         if ((targetFlags & Target.InstanceAccessors) && (descriptor.get || descriptor.set)) {
-            Object.defineProperty(target.prototype, key, {
-                get: descriptor.get ? aspectObject.overload(descriptor.get) : undefined,
-                set: descriptor.set ? aspectObject.overload(descriptor.set) : undefined,
-                enumerable: descriptor.enumerable,
-                configurable: descriptor.configurable,
-            });
+            decorateAccessor(target.prototype, key, descriptor, aspectObject);
         }
 
         if ((targetFlags & Target.InstanceMethods) && typeof descriptor.value == "function") {
-            Object.defineProperty(target.prototype, key, {
-                value: aspectObject.overload(descriptor.value),
-                enumerable: descriptor.enumerable,
-                configurable: descriptor.configurable,
-                writable: descriptor.writable
-            });
+            decorateProperty(target.prototype, key, descriptor, aspectObject);
         }
     });
 
     staticDescriptors.forEach(({ key, descriptor }) => {
         if ((targetFlags & Target.StaticAccessors) && (descriptor.get || descriptor.set)) {
-            Object.defineProperty(target, key, {
-                get: descriptor.get ? aspectObject.overload(descriptor.get) : undefined,
-                set: descriptor.set ? aspectObject.overload(descriptor.set) : undefined,
-                enumerable: descriptor.enumerable,
-                configurable: descriptor.configurable,
-            });
+            decorateAccessor(target, key, descriptor, aspectObject);
         }
 
         if ((targetFlags & Target.StaticMethods) && typeof descriptor.value == "function") {
-            Object.defineProperty(target, key, {
-                value: aspectObject.overload(descriptor.value),
-                enumerable: descriptor.enumerable,
-                configurable: descriptor.configurable,
-                writable: descriptor.writable
-            });
+            decorateProperty(target, key, descriptor, aspectObject);
         }
     });
 }
 
-function getDescriptors(target: any, aspectObject: AspectBase, targetFlags: number) {
+function decorateAccessor(target: Function, key: string, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
+    Object.defineProperty(target, key, {
+        get: descriptor.get ? aspectObject.overload(descriptor.get) : undefined,
+        set: descriptor.set ? aspectObject.overload(descriptor.set) : undefined,
+        enumerable: descriptor.enumerable,
+        configurable: descriptor.configurable,
+    });
+}
+
+function decorateProperty(target: Function, key: string, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
+    Object.defineProperty(target, key, {
+        value: aspectObject.overload(descriptor.value),
+        enumerable: descriptor.enumerable,
+        configurable: descriptor.configurable,
+    });
+}
+
+function getDescriptors(target: any, aspectObject: AspectBase) {
     return Object.getOwnPropertyNames(target)
         .filter(key => key !== "constructor")
         .map(key => ({ key: key, descriptor: Object.getOwnPropertyDescriptor(target, key) }))
