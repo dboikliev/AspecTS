@@ -1,9 +1,7 @@
-language: typescript
+language: node_js
 
-before_install:
-  - npm install -g npm@'>=3.10.10'
-  - npm install -g n
-  - n stable
+node_js:
+  - "7"
 
 install: 
   - npm install
