@@ -148,7 +148,11 @@ Target is a bitfalgs enum which contains the possible targets for an aspect.
 Targets can be combined with the bitwise-or operator ( | ).
 
 ```typescript
-@aspect(new TestBoundary(), Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors)
+@aspect(new TestBoundary(), 
+    Target.InstanceAccessors | 
+    Target.InstanceMethods | 
+    Target.StaticMethods | 
+    Target.StaticAccessors)
 class TestClass {
     private _testField: number;
     private static _testStaticField: number;
