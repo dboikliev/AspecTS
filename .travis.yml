@@ -1,3 +1,8 @@
+language: typescript
+
+before_install:
+  - npm use 7
+
 install: 
   - npm install
 
