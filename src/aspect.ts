@@ -1,7 +1,6 @@
 declare const Symbol: any;
 
 const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
-console.log(overloadKey);
 
 export enum Target {
     InstanceMethods = 1,
@@ -37,7 +36,7 @@ export abstract class BoundaryAspect implements AspectBase {
 export abstract class ErrorAspect implements AspectBase {
     abstract onError(error: any);
 
-    overload(func: (...args) => any): (...args) => any {
+    [overloadKey](func: (...args) => any): (...args) => any {
         let onError = this.onError.bind(this);
         return function (...args) {
             try {
@@ -53,7 +52,7 @@ export abstract class ErrorAspect implements AspectBase {
 export abstract class SurroundAspect implements AspectBase {
     abstract onInvoke(func: Function): Function;
 
-    overload(func: (...args) => any): (...args) => any {
+    [overloadKey](func: (...args) => any): (...args) => any {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
             return onInvoke(func).apply(this, args);

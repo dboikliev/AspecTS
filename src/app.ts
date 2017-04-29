@@ -1,10 +1,14 @@
-import { 
+import {
     aspect,
-    BoundaryAspect,
+    ErrorAspect,
     Target
 } from "./aspect";
 
-class TestBoundary extends BoundaryAspect {
+class TestBoundary extends ErrorAspect {
+    onError() {
+        console.log("On error.");
+    }
+
     onEntry(...args) {
         console.log("dasdasda");
         return args;

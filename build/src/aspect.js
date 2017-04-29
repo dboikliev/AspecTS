@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
-console.log(overloadKey);
 var Target;
 (function (Target) {
     Target[Target["InstanceMethods"] = 1] = "InstanceMethods";
@@ -29,7 +28,7 @@ class BoundaryAspect {
 }
 exports.BoundaryAspect = BoundaryAspect;
 class ErrorAspect {
-    overload(func) {
+    [overloadKey](func) {
         let onError = this.onError.bind(this);
         return function (...args) {
             try {
@@ -43,7 +42,7 @@ class ErrorAspect {
 }
 exports.ErrorAspect = ErrorAspect;
 class SurroundAspect {
-    overload(func) {
+    [overloadKey](func) {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
             return onInvoke(func).apply(this, args);

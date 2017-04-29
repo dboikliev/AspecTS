@@ -7,7 +7,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const aspect_1 = require("./aspect");
-class TestBoundary extends aspect_1.BoundaryAspect {
+class TestBoundary extends aspect_1.ErrorAspect {
+    onError() {
+        console.log("On error.");
+    }
     onEntry(...args) {
         console.log("dasdasda");
         return args;
