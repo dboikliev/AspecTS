@@ -1,7 +1,7 @@
 language: typescript
 
 before_install:
-  - npm use 7
+  - npm install -g npm@'>=3.10.10'
 
 install: 
   - npm install
