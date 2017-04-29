@@ -2,6 +2,8 @@ language: typescript
 
 before_install:
   - npm install -g npm@'>=3.10.10'
+  - npm install -g n
+  - n stable
 
 install: 
   - npm install
