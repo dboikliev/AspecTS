@@ -87,7 +87,6 @@ describe("boundary aspect tests", () => {
 
         class TestAspect extends BoundaryAspect {
             onEntry(...args) {
-                console.log(args);
                 receivedArguments = args;
                 return args;
             }
