@@ -59,7 +59,7 @@ function aspect(aspectObject, targetFlags = Target.Constructor | Target.Instance
             case 1:
                 classAspect.call(this, ...args, aspectObject, targetFlags);
                 if (targetFlags & Target.Constructor) {
-                    return constructorAaspect.call(this, ...args, aspectObject);
+                    return constructorAspect.call(this, ...args, aspectObject);
                 }
                 break;
             case 2:
@@ -96,7 +96,7 @@ function classAspect(target, aspectObject, targetFlags) {
         }
     });
 }
-function constructorAaspect(target, aspectObject) {
+function constructorAspect(target, aspectObject) {
     let construct = function (...args) {
         return new target(...args);
     };
