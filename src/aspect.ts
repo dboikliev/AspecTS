@@ -112,7 +112,6 @@ function classAspect(target: Function, aspectObject: AspectBase, targetFlags: nu
 }
 
 function constructorAaspect(target: { new(...args): AspectBase }, aspectObject: AspectBase) {
-
     let construct = function (...args) {
         return new target(...args);
     }
