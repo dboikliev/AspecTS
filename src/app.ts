@@ -2,6 +2,7 @@ import {
     aspect,
     ErrorAspect,
     BoundaryAspect,
+    SurroundAspect,
     Target
 } from "./aspect";
 
@@ -21,12 +22,24 @@ class TestBoundary extends BoundaryAspect {
 }
 
 
-@aspect(new TestBoundary())
-class TestClass {
+class TestBase {
+    a: number;
+    constructor() {
+        this.a = 5;
+    }
+
+    static shit() {
+        return "shit";
+    }
+}
+
+// @aspect(new TestBoundary())
+class TestClass extends TestBase {
     private _testField: number;
     private static _testStaticField: number;
 
     constructor(...args) {
+        super();
         console.log("In ctor");
     }
 
@@ -56,8 +69,18 @@ class TestClass {
 }
 
 
-let instance = new TestClass();
-// instance.instanceAccessor = 2;
-// console.log(instance.instanceAccessor);
-console.log(TestClass.staticMethod(1));
-console.log(instance.instanceMethod(1));
+// let instance = new TestClass();
+console.dir(TestClass.prototype);
+console.log(TestClass.shit());
+// // instance.instanceAccessor = 2;
+// // console.log(instance.instanceAccessor);
+// console.log(TestClass.shit())
+// console.log(TestClass.staticMethod(1));
+// console.log(instance.instanceMethod(1));
+
+class A {
+}
+class B extends A {
+}
+
+console.log(B.prototype);

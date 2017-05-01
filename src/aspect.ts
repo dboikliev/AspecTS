@@ -112,13 +112,22 @@ function classAspect(target: Function, aspectObject: AspectBase, targetFlags: nu
 }
 
 function constructorAspect(target: { new(...args): AspectBase }, aspectObject: AspectBase) {
-    let construct = function (...args) {
+    let ctor = function (...args) {
         return new target(...args);
     }
 
-    return new Proxy(target, {
-        construct: aspectObject[overloadKey](construct)
-    });
+    ctor = aspectObject[overloadKey](ctor);
+
+    ctor.prototype = target.prototype;
+    Object.setPrototypeOf(ctor, Object.getPrototypeOf(target));
+    // ctor.__proto__ = target.__proto__;
+
+    Object.getOwnPropertyNames(target)
+        .filter(key => !(ctor as Object).hasOwnProperty(key))
+        .map(key => ({ key: key, descriptor: Object.getOwnPropertyDescriptor(target, key) }))
+        .forEach(keyDescriptorPair => Object.defineProperty(ctor, keyDescriptorPair.key, keyDescriptorPair.descriptor));
+
+    return ctor;
 }
 
 function decorateAccessor(target: Function, key: string, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
