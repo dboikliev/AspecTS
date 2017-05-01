@@ -20,6 +20,7 @@ It is possible to choose only specific members using the `Target` enum.
 2. Static methods
 3. Instance accessors
 4. Static accessors
+5. Constructor
 
 ## Examples:
 
