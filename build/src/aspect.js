@@ -7,6 +7,9 @@ var Target;
     Target[Target["InstanceAccessors"] = 2] = "InstanceAccessors";
     Target[Target["StaticMethods"] = 4] = "StaticMethods";
     Target[Target["StaticAccessors"] = 8] = "StaticAccessors";
+    Target[Target["Constructor"] = 16] = "Constructor";
+    Target[Target["InstanceMembers"] = 3] = "InstanceMembers";
+    Target[Target["StaticMembers"] = 12] = "StaticMembers";
 })(Target = exports.Target || (exports.Target = {}));
 class AspectBase {
     [overloadKey](func) {
@@ -50,11 +53,14 @@ class SurroundAspect {
     }
 }
 exports.SurroundAspect = SurroundAspect;
-function aspect(aspectObject, targetFlags = Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
+function aspect(aspectObject, targetFlags = Target.Constructor | Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
     return function (...args) {
         switch (args.length) {
             case 1:
                 classAspect.call(this, ...args, aspectObject, targetFlags);
+                if (targetFlags & Target.Constructor) {
+                    return constructorAaspect.call(this, ...args, aspectObject);
+                }
                 break;
             case 2:
                 throw Error("Cannot use aspect on properties.");
@@ -88,6 +94,14 @@ function classAspect(target, aspectObject, targetFlags) {
         if ((targetFlags & Target.StaticMethods) && typeof descriptor.value === "function") {
             decorateProperty(target, key, descriptor, aspectObject);
         }
+    });
+}
+function constructorAaspect(target, aspectObject) {
+    let construct = function (...args) {
+        return new target(...args);
+    };
+    return new Proxy(target, {
+        construct: aspectObject[overloadKey](construct)
     });
 }
 function decorateAccessor(target, key, descriptor, aspectObject) {

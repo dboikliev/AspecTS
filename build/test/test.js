@@ -50,7 +50,6 @@ describe("error aspect tests", () => {
 describe("boundary aspect tests", () => {
     it("should call onEntry and onExit when method is called", () => {
         let [isOnEntryCalled, isOnExitCalled] = [false, false];
-        console.log(isOnEntryCalled, isOnExitCalled);
         class TestAspect extends aspect_1.BoundaryAspect {
             onEntry(...args) {
                 isOnEntryCalled = true;
@@ -76,7 +75,6 @@ describe("boundary aspect tests", () => {
         let originalArguments = [1, 2, 3], receivedArguments, originalReturnValue = "some value", receivedReturnValue;
         class TestAspect extends aspect_1.BoundaryAspect {
             onEntry(...args) {
-                console.log(args);
                 receivedArguments = args;
                 return args;
             }

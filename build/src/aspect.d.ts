@@ -3,6 +3,9 @@ export declare enum Target {
     InstanceAccessors = 2,
     StaticMethods = 4,
     StaticAccessors = 8,
+    Constructor = 16,
+    InstanceMembers = 3,
+    StaticMembers = 12,
 }
 export declare abstract class AspectBase {
 }
@@ -16,4 +19,4 @@ export declare abstract class ErrorAspect implements AspectBase {
 export declare abstract class SurroundAspect implements AspectBase {
     abstract onInvoke(func: Function): Function;
 }
-export declare function aspect(aspectObject: AspectBase, targetFlags?: number): (...args: any[]) => void;
+export declare function aspect(aspectObject: AspectBase, targetFlags?: number): (...args: any[]) => any;

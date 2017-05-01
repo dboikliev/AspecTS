@@ -1,7 +1,7 @@
 import "mocha";
 import * as assert from "assert";
-import { 
-    aspect, 
+import {
+    aspect,
     ErrorAspect,
     BoundaryAspect
 } from "./../src/aspect";

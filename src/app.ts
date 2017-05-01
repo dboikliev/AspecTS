@@ -1,10 +1,11 @@
 import {
     aspect,
     ErrorAspect,
+    BoundaryAspect,
     Target
 } from "./aspect";
 
-class TestBoundary extends ErrorAspect {
+class TestBoundary extends BoundaryAspect {
     onError() {
         console.log("On error.");
     }
@@ -20,10 +21,14 @@ class TestBoundary extends ErrorAspect {
 }
 
 
-@aspect(new TestBoundary(), Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors)
+@aspect(new TestBoundary())
 class TestClass {
     private _testField: number;
     private static _testStaticField: number;
+
+    constructor(...args) {
+        console.log("In ctor");
+    }
 
     get instanceAccessor() {
         return this._testField;

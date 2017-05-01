@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const aspect_1 = require("./aspect");
-class TestBoundary extends aspect_1.ErrorAspect {
+class TestBoundary extends aspect_1.BoundaryAspect {
     onError() {
         console.log("On error.");
     }
@@ -20,6 +20,9 @@ class TestBoundary extends aspect_1.ErrorAspect {
     }
 }
 let TestClass = class TestClass {
+    constructor(...args) {
+        console.log("In ctor");
+    }
     get instanceAccessor() {
         return this._testField;
     }
@@ -40,7 +43,7 @@ let TestClass = class TestClass {
     }
 };
 TestClass = __decorate([
-    aspect_1.aspect(new TestBoundary(), aspect_1.Target.InstanceAccessors | aspect_1.Target.InstanceMethods | aspect_1.Target.StaticMethods | aspect_1.Target.StaticAccessors)
+    aspect_1.aspect(new TestBoundary())
 ], TestClass);
 let instance = new TestClass();
 // instance.instanceAccessor = 2;
