@@ -13,7 +13,7 @@ An [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_p
 ## Supported targets:
 
 The aspects can be applied on methods or [on the class itself](#target).
-When applied on a class the aspect is applied on all instance and static members and accesoors.
+When applied on a class the aspect is applied on **all** instance and static members and accesoors.
 It is possible to choose only specific members using the `Target` enum.
 
 1. Instance methods
