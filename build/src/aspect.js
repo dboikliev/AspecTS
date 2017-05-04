@@ -10,6 +10,7 @@ var Target;
     Target[Target["Constructor"] = 16] = "Constructor";
     Target[Target["InstanceMembers"] = 3] = "InstanceMembers";
     Target[Target["StaticMembers"] = 12] = "StaticMembers";
+    Target[Target["All"] = 31] = "All";
 })(Target = exports.Target || (exports.Target = {}));
 class AspectBase {
     [overloadKey](func) {
@@ -53,7 +54,7 @@ class SurroundAspect {
     }
 }
 exports.SurroundAspect = SurroundAspect;
-function aspect(aspectObject, targetFlags = Target.Constructor | Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
+function aspect(aspectObject, targetFlags = Target.All) {
     return function (...args) {
         switch (args.length) {
             case 1:

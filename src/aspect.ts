@@ -9,7 +9,8 @@ export enum Target {
     StaticAccessors = 1 << 3,
     Constructor = 1 << 4,
     InstanceMembers = InstanceMethods | InstanceAccessors,
-    StaticMembers = StaticMethods | StaticAccessors
+    StaticMembers = StaticMethods | StaticAccessors,
+    All = InstanceMembers | StaticMembers | Constructor
 }
 
 export abstract class AspectBase {
@@ -63,7 +64,7 @@ export abstract class SurroundAspect implements AspectBase {
     }
 }
 
-export function aspect(aspectObject: AspectBase, targetFlags: number = Target.Constructor | Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
+export function aspect(aspectObject: AspectBase, targetFlags: number = Target.All) {
     return function (...args) {
         switch (args.length) {
             case 1:

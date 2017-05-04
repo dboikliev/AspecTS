@@ -46,8 +46,6 @@ TestClass = __decorate([
     aspect_1.aspect(new TestBoundary())
 ], TestClass);
 let instance = new TestClass();
-// instance.instanceAccessor = 2;
-// console.log(instance.instanceAccessor);
 console.log(TestClass.staticMethod(1));
 console.log(instance.instanceMethod(1));
 //# sourceMappingURL=app.js.map

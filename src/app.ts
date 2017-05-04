@@ -20,7 +20,6 @@ class TestBoundary extends BoundaryAspect {
     }
 }
 
-
 @aspect(new TestBoundary())
 class TestClass {
     private _testField: number;
@@ -57,7 +56,5 @@ class TestClass {
 
 
 let instance = new TestClass();
-// instance.instanceAccessor = 2;
-// console.log(instance.instanceAccessor);
 console.log(TestClass.staticMethod(1));
 console.log(instance.instanceMethod(1));
