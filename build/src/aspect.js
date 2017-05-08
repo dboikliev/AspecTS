@@ -138,40 +138,27 @@ function functionAspect(target, key, descriptor, aspectObject) {
     }
     return descriptor;
 }
-function error(base) {
+function mixinAspect(base, override) {
     let extended = class extends base {
     };
     applyMixins(extended, ErrorAspect);
     extended.prototype[overloadKey] = function (func) {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
+        let bound = override.bind(this, f);
         return bound();
     };
     return extended;
+}
+function error(base) {
+    return mixinAspect(base, ErrorAspect.prototype[overloadKey]);
 }
 exports.error = error;
 function surround(base) {
-    let extended = class extends base {
-    };
-    applyMixins(extended, SurroundAspect);
-    extended.prototype[overloadKey] = function (func) {
-        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
-        return bound();
-    };
-    return extended;
+    return mixinAspect(base, SurroundAspect.prototype[overloadKey]);
 }
 exports.surround = surround;
 function boundary(base) {
-    let extended = class extends base {
-    };
-    applyMixins(extended, BoundaryAspect);
-    extended.prototype[overloadKey] = function (func) {
-        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
-        return bound();
-    };
-    return extended;
+    return mixinAspect(base, BoundaryAspect.prototype[overloadKey]);
 }
 exports.boundary = boundary;
 function applyMixins(targetClass, mixin) {

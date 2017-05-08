@@ -165,44 +165,29 @@ export interface Constructable<T> {
 
 export interface Base { }
 
-export function error<T extends Base>(base: Constructable<T>): Constructable<ErrorAspect & T>  {
+function mixinAspect<TBase, TAspect extends AspectBase>(base: Constructable<TBase>, override: (func: (...args) => any) => (...args) => any): Constructable<TAspect & TBase> {
     let extended =  class extends (base as Constructable<Base>) {
     };
 
     applyMixins(extended, ErrorAspect);
     extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
+        let bound = override.bind(this, f);
         return bound();
     }
     return extended as any;
 }
 
+export function error<T extends Base>(base: Constructable<T>): Constructable<ErrorAspect & T>  {
+    return mixinAspect<T, ErrorAspect>(base, ErrorAspect.prototype[overloadKey]);
+}
 
 export function surround<T extends Base>(base: Constructable<T>): Constructable<SurroundAspect & T> {
-    let extended =  class extends (base as Constructable<Base>) {
-    };
-
-    applyMixins(extended, SurroundAspect);
-    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
-        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
-        return bound();
-    }
-    return extended as any;
+    return mixinAspect<T, SurroundAspect>(base, SurroundAspect.prototype[overloadKey]);
 }
 
 export function boundary<T extends Base>(base: Constructable<T>): Constructable<BoundaryAspect & T> {
-    let extended =  class extends (base as Constructable<Base>) {
-    };
-
-    applyMixins(extended, BoundaryAspect);
-    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
-        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
-        return bound();
-    };
-    return extended as any;
+    return mixinAspect<T, BoundaryAspect>(base, BoundaryAspect.prototype[overloadKey]);
 }
 
 function applyMixins(targetClass: Function, mixin: Function) {
