@@ -9,6 +9,7 @@ An [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_p
 1. [BoundaryAspect](#boundary)
 2. [SurroundAspect](#surround)
 3. [ErrorAspect](#error)
+4. [Aspect mixins](#mixins)
 
 ## Supported targets:
 
@@ -144,7 +145,109 @@ test.doSomething();
 LOGGED ERROR: Something went wrong while doing something.
 ```
 
-#### 4. Target<a id="target"></a>
+#### 4. Aspect mixins:<a id="mixins"></a>
+
+The `surround`, `boundary`, `error` methods allow the creation of a new aspect by combining joint points of `SurroundAspect`, `BoundaryAspect` and `ErrorAspect`.
+
+```typescript
+import {
+    aspect,
+    ErrorAspect,
+    BoundaryAspect,
+    Target,
+    surround,
+    boundary,
+    error
+} from "./aspect";
+
+class BaseLogger {
+    protected _logger: { log: (...args: any[]) => void };
+
+    constructor() {
+        this._logger = console;
+    }
+}
+
+class LoggerAspect extends error(surround(boundary(BaseLogger))) {
+    onError(e: Error) {
+        this._logger.log("ERROR: " + e.message);
+    }
+
+    onEntry(...args) {
+        this._logger.log("ENTRY: " + args);
+        return args;
+    }
+
+    onExit(returnValue) {
+        this._logger.log("EXIT: " + returnValue);
+        return returnValue;
+    }
+
+    onInvoke(func: Function) {
+        let logger = this._logger;
+        return function (...args) {
+            logger.log("INVOKE BEGIN");
+            let result = func.apply(this, args);
+            logger.log("INVOKE END");
+            return result;
+        };
+    }
+}
+
+
+@aspect(new LoggerAspect(), Target.All ^ Target.Constructor)
+class TestClass {
+    private _testField: number;
+    private static _testStaticField: number;
+
+    get instanceAccessor() {
+        return this._testField;
+    }
+
+    set instanceAccessor(value) {
+        this._testField = value;
+    }
+
+    instanceMethod(testParameter: number) {
+        throw Error("Test error.");
+        return testParameter;
+    }
+
+    static staticMethod(testParameter: number) {
+        return testParameter;
+    }
+
+    static get staticField() {
+        return this._testStaticField;
+    }
+
+    static set staticField(value) {
+        this._testStaticField = value;
+    }
+}
+
+
+let instance = new TestClass();
+instance.instanceMethod(1);
+console.log("-".repeat(20));
+TestClass.staticMethod(1);
+```
+
+#### Result:
+
+```
+INVOKE BEGIN
+ENTRY: 1
+ERROR: Test error.
+--------------------
+INVOKE BEGIN
+ENTRY: 1
+EXIT: 1
+INVOKE END
+```
+
+
+#### 5. Target<a id="target"></a>
 
 Target is a bitfalgs enum which contains the possible targets for an aspect.
 Targets can be combined with the bitwise-or operator ( | ).

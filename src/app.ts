@@ -8,43 +8,45 @@ import {
     error
 } from "./aspect";
 
-class SomeBase {
+class BaseLogger {
+    protected _logger: { log: (...args: any[]) => void };
+
+    constructor() {
+        this._logger = console;
+    }
 }
 
-class Bla extends error(surround(boundary(SomeBase))) {
-    onError(e) {
-        console.log("Error: " + e.message);
+class LoggerAspect extends error(surround(boundary(BaseLogger))) {
+    onError(e: Error) {
+        this._logger.log("ERROR: " + e.message);
     }
 
     onEntry(...args) {
-        // console.log(args);
+        this._logger.log("ENTRY: " + args);
         return args;
     }
 
     onExit(returnValue) {
-        // console.log(returnValue);
+        this._logger.log("EXIT: " + returnValue);
         return returnValue;
     }
 
-    onInvoke(func) {
+    onInvoke(func: Function) {
+        let logger = this._logger;
         return function (...args) {
-            console.log("you've been");
-            // console.log(func.toString());
+            logger.log("INVOKE BEGIN");
             let result = func.apply(this, args);
-            console.log("surrounded");
+            logger.log("INVOKE END");
             return result;
         };
     }
 }
 
-@aspect(new Bla())
+
+@aspect(new LoggerAspect(), Target.All ^ Target.Constructor)
 class TestClass {
     private _testField: number;
     private static _testStaticField: number;
-
-    constructor(...args) {
-        console.log("In ctor");
-    }
 
     get instanceAccessor() {
         return this._testField;
@@ -54,8 +56,8 @@ class TestClass {
         this._testField = value;
     }
 
-    @aspect(new Bla())
     instanceMethod(testParameter: number) {
+        throw Error("Test error.");
         return testParameter;
     }
 
@@ -75,5 +77,5 @@ class TestClass {
 
 let instance = new TestClass();
 instance.instanceMethod(1);
-console.log(TestClass.staticMethod(1));
-console.log(instance.instanceMethod(1));
+console.log("-".repeat(20));
+TestClass.staticMethod(1);

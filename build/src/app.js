@@ -7,34 +7,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const aspect_1 = require("./aspect");
-class SomeBase {
+class BaseLogger {
+    constructor() {
+        this._logger = console;
+    }
 }
-class Bla extends aspect_1.error(aspect_1.surround(aspect_1.boundary(SomeBase))) {
+class LoggerAspect extends aspect_1.error(aspect_1.surround(aspect_1.boundary(BaseLogger))) {
     onError(e) {
-        console.log("Error: " + e.message);
+        this._logger.log("ERROR: " + e.message);
     }
     onEntry(...args) {
-        // console.log(args);
+        this._logger.log("ENTRY: " + args);
         return args;
     }
     onExit(returnValue) {
-        // console.log(returnValue);
+        this._logger.log("EXIT: " + returnValue);
         return returnValue;
     }
     onInvoke(func) {
+        let logger = this._logger;
         return function (...args) {
-            console.log("you've been");
-            // console.log(func.toString());
+            logger.log("INVOKE BEGIN");
             let result = func.apply(this, args);
-            console.log("surrounded");
+            logger.log("INVOKE END");
             return result;
         };
     }
 }
 let TestClass = class TestClass {
-    constructor(...args) {
-        console.log("In ctor");
-    }
     get instanceAccessor() {
         return this._testField;
     }
@@ -42,6 +42,7 @@ let TestClass = class TestClass {
         this._testField = value;
     }
     instanceMethod(testParameter) {
+        throw Error("Test error.");
         return testParameter;
     }
     static staticMethod(testParameter) {
@@ -54,14 +55,11 @@ let TestClass = class TestClass {
         this._testStaticField = value;
     }
 };
-__decorate([
-    aspect_1.aspect(new Bla())
-], TestClass.prototype, "instanceMethod", null);
 TestClass = __decorate([
-    aspect_1.aspect(new Bla())
+    aspect_1.aspect(new LoggerAspect(), aspect_1.Target.All ^ aspect_1.Target.Constructor)
 ], TestClass);
 let instance = new TestClass();
 instance.instanceMethod(1);
-console.log(TestClass.staticMethod(1));
-console.log(instance.instanceMethod(1));
+console.log("-".repeat(20));
+TestClass.staticMethod(1);
 //# sourceMappingURL=app.js.map
