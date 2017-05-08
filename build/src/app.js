@@ -31,7 +31,10 @@ class Bla extends aspect_1.error(aspect_1.surround(aspect_1.boundary(SomeBase)))
         };
     }
 }
-class TestClass {
+let TestClass = class TestClass {
+    constructor(...args) {
+        console.log("In ctor");
+    }
     get instanceAccessor() {
         return this._testField;
     }
@@ -50,12 +53,15 @@ class TestClass {
     static set staticField(value) {
         this._testStaticField = value;
     }
-}
+};
 __decorate([
     aspect_1.aspect(new Bla())
 ], TestClass.prototype, "instanceMethod", null);
+TestClass = __decorate([
+    aspect_1.aspect(new Bla())
+], TestClass);
 let instance = new TestClass();
-// instance.instanceAccessor = 2;
-// console.log(instance.instanceAccessor);
 instance.instanceMethod(1);
+console.log(TestClass.staticMethod(1));
+console.log(instance.instanceMethod(1));
 //# sourceMappingURL=app.js.map

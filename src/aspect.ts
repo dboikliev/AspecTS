@@ -6,7 +6,11 @@ export enum Target {
     InstanceMethods = 1,
     InstanceAccessors = 1 << 1,
     StaticMethods = 1 << 2,
-    StaticAccessors = 1 << 3
+    StaticAccessors = 1 << 3,
+    Constructor = 1 << 4,
+    InstanceMembers = InstanceMethods | InstanceAccessors,
+    StaticMembers = StaticMethods | StaticAccessors,
+    All = InstanceMembers | StaticMembers | Constructor
 }
 
 export abstract class AspectBase {
@@ -60,11 +64,14 @@ export abstract class SurroundAspect implements AspectBase {
     }
 }
 
-export function aspect(aspectObject: AspectBase, targetFlags: number = Target.InstanceAccessors | Target.InstanceMethods | Target.StaticMethods | Target.StaticAccessors) {
+export function aspect(aspectObject: AspectBase, targetFlags: number = Target.All) {
     return function (...args) {
         switch (args.length) {
             case 1:
                 classAspect.call(this, ...args, aspectObject, targetFlags);
+                if (targetFlags & Target.Constructor) {
+                    return constructorAspect.call(this, ...args, aspectObject);
+                }
                 break;
             case 2:
                 throw Error("Cannot use aspect on properties.");
@@ -83,6 +90,7 @@ export function aspect(aspectObject: AspectBase, targetFlags: number = Target.In
 function classAspect(target: Function, aspectObject: AspectBase, targetFlags: number) {
     let instanceDescriptors = getDescriptors(target.prototype, aspectObject);
     let staticDescriptors = getDescriptors(target, aspectObject);
+
     instanceDescriptors.forEach(({ key, descriptor }) => {
         if ((targetFlags & Target.InstanceAccessors) && (descriptor.get || descriptor.set)) {
             decorateAccessor(target.prototype, key, descriptor, aspectObject);
@@ -101,6 +109,16 @@ function classAspect(target: Function, aspectObject: AspectBase, targetFlags: nu
         if ((targetFlags & Target.StaticMethods) && typeof descriptor.value === "function") {
             decorateProperty(target, key, descriptor, aspectObject);
         }
+    });
+}
+
+function constructorAspect(target: { new(...args): AspectBase }, aspectObject: AspectBase) {
+    let construct = function (...args) {
+        return new target(...args);
+    }
+
+    return new Proxy(target, {
+        construct: aspectObject[overloadKey](construct)
     });
 }
 

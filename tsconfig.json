@@ -4,11 +4,11 @@
         "target": "es6",
         "noImplicitAny": false,
         "sourceMap": true,
-        "rootDir": "./src",
         "outDir": "./build",
         "experimentalDecorators": true,
         "declaration": true,
-        "declarationDir": "./build"
+        "traceResolution": false,
+        "pretty": true
     },
     "exclude": [
         "node_modules",

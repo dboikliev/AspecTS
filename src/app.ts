@@ -1,12 +1,12 @@
-import { 
+import {
     aspect,
+    ErrorAspect,
     BoundaryAspect,
     Target,
     surround,
     boundary,
     error
 } from "./aspect";
-
 
 class SomeBase {
 }
@@ -37,10 +37,14 @@ class Bla extends error(surround(boundary(SomeBase))) {
     }
 }
 
-
+@aspect(new Bla())
 class TestClass {
     private _testField: number;
     private static _testStaticField: number;
+
+    constructor(...args) {
+        console.log("In ctor");
+    }
 
     get instanceAccessor() {
         return this._testField;
@@ -70,6 +74,6 @@ class TestClass {
 
 
 let instance = new TestClass();
-// instance.instanceAccessor = 2;
-// console.log(instance.instanceAccessor);
 instance.instanceMethod(1);
+console.log(TestClass.staticMethod(1));
+console.log(instance.instanceMethod(1));

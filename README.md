@@ -1,4 +1,5 @@
 # AspecTS
+
 [![Build Status](https://travis-ci.org/dboikliev/AspecTS.svg?branch=master)](https://travis-ci.org/dboikliev/AspecTS)
 
 An [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_programming) library implemented in TypeScript
@@ -8,6 +9,18 @@ An [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_p
 1. [BoundaryAspect](#boundary)
 2. [SurroundAspect](#surround)
 3. [ErrorAspect](#error)
+
+## Supported targets:
+
+The aspects can be applied on methods or [on the class itself](#target).
+When applied on a class the aspect is applied on **all** instance and static members and accessors and on the constructor.
+It is possible to choose only specific members using the `Target` enum.
+
+1. Instance methods
+2. Static methods
+3. Instance accessors
+4. Static accessors
+5. Constructor
 
 ## Examples:
 
@@ -129,4 +142,45 @@ test.doSomething();
 
 ```
 LOGGED ERROR: Something went wrong while doing something.
+```
+
+#### 4. Target<a id="target"></a>
+
+Target is a bitfalgs enum which contains the possible targets for an aspect.
+Targets can be combined with the bitwise-or operator ( | ).
+
+```typescript
+@aspect(new TestBoundary(), 
+    Target.InstanceAccessors | 
+    Target.InstanceMethods | 
+    Target.StaticMethods | 
+    Target.StaticAccessors)
+class TestClass {
+    private _testField: number;
+    private static _testStaticField: number;
+
+    get instanceAccessor() {
+        return this._testField;
+    }
+
+    set instanceAccessor(value) {
+        this._testField = value;
+    }
+
+    instanceMethod(testParameter: number) {
+        return testParameter;
+    }
+
+    static staticMethod(testParameter: number) {
+        return testParameter;
+    }
+
+    static get staticField() {
+        return this._testStaticField;
+    }
+
+    static set staticField(value) {
+        this._testStaticField = value;
+    }
+}
 ```
