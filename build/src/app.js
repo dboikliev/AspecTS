@@ -7,16 +7,28 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const aspect_1 = require("./aspect");
-class TestBoundary extends aspect_1.BoundaryAspect {
-    onError() {
-        console.log("On error.");
+class SomeBase {
+}
+class Bla extends aspect_1.error(aspect_1.surround(aspect_1.boundary(SomeBase))) {
+    onError(e) {
+        console.log("Error: " + e.message);
     }
     onEntry(...args) {
-        console.log("dasdasda");
+        // console.log(args);
         return args;
     }
     onExit(returnValue) {
+        // console.log(returnValue);
         return returnValue;
+    }
+    onInvoke(func) {
+        return function (...args) {
+            console.log("you've been");
+            // console.log(func.toString());
+            let result = func.apply(this, args);
+            console.log("surrounded");
+            return result;
+        };
     }
 }
 let TestClass = class TestClass {
@@ -42,10 +54,14 @@ let TestClass = class TestClass {
         this._testStaticField = value;
     }
 };
+__decorate([
+    aspect_1.aspect(new Bla())
+], TestClass.prototype, "instanceMethod", null);
 TestClass = __decorate([
-    aspect_1.aspect(new TestBoundary())
+    aspect_1.aspect(new Bla())
 ], TestClass);
 let instance = new TestClass();
+instance.instanceMethod(1);
 console.log(TestClass.staticMethod(1));
 console.log(instance.instanceMethod(1));
 //# sourceMappingURL=app.js.map

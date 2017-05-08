@@ -155,3 +155,55 @@ function functionAspect(target: Function, key: string | symbol, descriptor: Prop
     }
     return descriptor;
 }
+
+export interface Constructable<T> {
+    new(...args): T;
+}
+
+export interface Base { }
+
+export function error<T extends Base>(base: Constructable<T>): Constructable<ErrorAspect & T>  {
+    let extended =  class extends (base as Constructable<Base>) {
+    };
+
+    applyMixins(extended, ErrorAspect);
+    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
+        return bound();
+    }
+    return extended as any;
+}
+
+
+export function surround<T extends Base>(base: Constructable<T>): Constructable<SurroundAspect & T> {
+    let extended =  class extends (base as Constructable<Base>) {
+    };
+
+    applyMixins(extended, SurroundAspect);
+    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
+        return bound();
+    }
+    return extended as any;
+}
+
+export function boundary<T extends Base>(base: Constructable<T>): Constructable<BoundaryAspect & T> {
+    let extended =  class extends (base as Constructable<Base>) {
+    };
+
+    applyMixins(extended, BoundaryAspect);
+    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
+        return bound();
+    };
+    return extended as any;
+}
+
+function applyMixins(targetClass: Function, mixin: Function) {
+    Object.getOwnPropertyNames(mixin.prototype).forEach(prop => {
+        targetClass.prototype[prop] = mixin.prototype[prop];
+    });
+}

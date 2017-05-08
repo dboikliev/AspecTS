@@ -21,3 +21,11 @@ export declare abstract class SurroundAspect implements AspectBase {
     abstract onInvoke(func: Function): Function;
 }
 export declare function aspect(aspectObject: AspectBase, targetFlags?: number): (...args: any[]) => any;
+export interface Constructable<T> {
+    new (...args: any[]): T;
+}
+export interface Base {
+}
+export declare function error<T extends Base>(base: Constructable<T>): Constructable<ErrorAspect & T>;
+export declare function surround<T extends Base>(base: Constructable<T>): Constructable<SurroundAspect & T>;
+export declare function boundary<T extends Base>(base: Constructable<T>): Constructable<BoundaryAspect & T>;

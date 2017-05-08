@@ -135,4 +135,45 @@ function functionAspect(target, key, descriptor, aspectObject) {
     }
     return descriptor;
 }
+function error(base) {
+    let extended = class extends base {
+    };
+    applyMixins(extended, ErrorAspect);
+    extended.prototype[overloadKey] = function (func) {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
+        return bound();
+    };
+    return extended;
+}
+exports.error = error;
+function surround(base) {
+    let extended = class extends base {
+    };
+    applyMixins(extended, SurroundAspect);
+    extended.prototype[overloadKey] = function (func) {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
+        return bound();
+    };
+    return extended;
+}
+exports.surround = surround;
+function boundary(base) {
+    let extended = class extends base {
+    };
+    applyMixins(extended, BoundaryAspect);
+    extended.prototype[overloadKey] = function (func) {
+        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
+        let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
+        return bound();
+    };
+    return extended;
+}
+exports.boundary = boundary;
+function applyMixins(targetClass, mixin) {
+    Object.getOwnPropertyNames(mixin.prototype).forEach(prop => {
+        targetClass.prototype[prop] = mixin.prototype[prop];
+    });
+}
 //# sourceMappingURL=aspect.js.map
