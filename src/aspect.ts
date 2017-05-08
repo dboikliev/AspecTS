@@ -167,11 +167,9 @@ export function error<T extends Base>(base: Constructable<T>): Constructable<Err
     };
 
     applyMixins(extended, ErrorAspect);
-     extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
-         
+    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
         let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
-        //   console.log(bound().toString());
         return bound();
     }
     return extended as any;
@@ -185,9 +183,7 @@ export function surround<T extends Base>(base: Constructable<T>): Constructable<
     applyMixins(extended, SurroundAspect);
     extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        // console.log(f.toString());
         let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
-            // console.log(bound().toString());
         return bound();
     }
     return extended as any;
@@ -201,7 +197,6 @@ export function boundary<T extends Base>(base: Constructable<T>): Constructable<
     extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
         let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
-        // console.log(bound().toString());
         return bound();
     };
     return extended as any;

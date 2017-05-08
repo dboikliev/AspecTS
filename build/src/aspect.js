@@ -142,7 +142,6 @@ function error(base) {
     extended.prototype[overloadKey] = function (func) {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
         let bound = ErrorAspect.prototype[overloadKey].bind(this, f);
-        //   console.log(bound().toString());
         return bound();
     };
     return extended;
@@ -154,9 +153,7 @@ function surround(base) {
     applyMixins(extended, SurroundAspect);
     extended.prototype[overloadKey] = function (func) {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        // console.log(f.toString());
         let bound = SurroundAspect.prototype[overloadKey].bind(this, f);
-        // console.log(bound().toString());
         return bound();
     };
     return extended;
@@ -169,7 +166,6 @@ function boundary(base) {
     extended.prototype[overloadKey] = function (func) {
         let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
         let bound = BoundaryAspect.prototype[overloadKey].bind(this, f);
-        // console.log(bound().toString());
         return bound();
     };
     return extended;
