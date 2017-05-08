@@ -118,7 +118,10 @@ function constructorAspect(target: { new(...args): AspectBase }, aspectObject: A
     }
 
     return new Proxy(target, {
-        construct: aspectObject[overloadKey](construct)
+        construct(target, argumentsList, newTarget) {
+            let result = aspectObject[overloadKey](construct)(argumentsList);
+            return result;
+        }
     });
 }
 

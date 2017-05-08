@@ -102,7 +102,10 @@ function constructorAspect(target, aspectObject) {
         return new target(...args);
     };
     return new Proxy(target, {
-        construct: aspectObject[overloadKey](construct)
+        construct(target, argumentsList, newTarget) {
+            let result = aspectObject[overloadKey](construct)(argumentsList);
+            return result;
+        }
     });
 }
 function decorateAccessor(target, key, descriptor, aspectObject) {

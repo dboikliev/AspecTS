@@ -17,7 +17,7 @@ class LoggerAspect extends aspect_1.error(aspect_1.surround(aspect_1.boundary(Ba
         this._logger.log("ERROR: " + e.message);
     }
     onEntry(...args) {
-        this._logger.log("ENTRY: " + args);
+        this._logger.log("ENTRY: " + args.join(","));
         return args;
     }
     onExit(returnValue) {
@@ -35,6 +35,9 @@ class LoggerAspect extends aspect_1.error(aspect_1.surround(aspect_1.boundary(Ba
     }
 }
 let TestClass = class TestClass {
+    constructor() {
+        // throw Error("Test error.");
+    }
     get instanceAccessor() {
         return this._testField;
     }
@@ -42,7 +45,6 @@ let TestClass = class TestClass {
         this._testField = value;
     }
     instanceMethod(testParameter) {
-        throw Error("Test error.");
         return testParameter;
     }
     static staticMethod(testParameter) {
@@ -56,7 +58,7 @@ let TestClass = class TestClass {
     }
 };
 TestClass = __decorate([
-    aspect_1.aspect(new LoggerAspect(), aspect_1.Target.All ^ aspect_1.Target.Constructor)
+    aspect_1.aspect(new LoggerAspect(), aspect_1.Target.All)
 ], TestClass);
 let instance = new TestClass();
 instance.instanceMethod(1);

@@ -22,7 +22,7 @@ class LoggerAspect extends error(surround(boundary(BaseLogger))) {
     }
 
     onEntry(...args) {
-        this._logger.log("ENTRY: " + args);
+        this._logger.log("ENTRY: " + args.join(","));
         return args;
     }
 
@@ -43,10 +43,14 @@ class LoggerAspect extends error(surround(boundary(BaseLogger))) {
 }
 
 
-@aspect(new LoggerAspect(), Target.All ^ Target.Constructor)
+@aspect(new LoggerAspect(), Target.All)
 class TestClass {
     private _testField: number;
     private static _testStaticField: number;
+
+    constructor () {
+        // throw Error("Test error.");
+    }
 
     get instanceAccessor() {
         return this._testField;
@@ -57,7 +61,6 @@ class TestClass {
     }
 
     instanceMethod(testParameter: number) {
-        throw Error("Test error.");
         return testParameter;
     }
 
