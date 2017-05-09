@@ -24,8 +24,6 @@ export declare function aspect(aspectObject: AspectBase, targetFlags?: number): 
 export interface Constructable<T> {
     new (...args: any[]): T;
 }
-export interface Base {
-}
-export declare function error<T extends Base>(base: Constructable<T>): Constructable<ErrorAspect & T>;
-export declare function surround<T extends Base>(base: Constructable<T>): Constructable<SurroundAspect & T>;
-export declare function boundary<T extends Base>(base: Constructable<T>): Constructable<BoundaryAspect & T>;
+export declare function error<T>(base: Constructable<T>): Constructable<ErrorAspect & T>;
+export declare function surround<T>(base: Constructable<T>): Constructable<SurroundAspect & T>;
+export declare function boundary<T>(base: Constructable<T>): Constructable<BoundaryAspect & T>;

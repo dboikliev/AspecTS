@@ -163,10 +163,9 @@ export interface Constructable<T> {
     new(...args): T;
 }
 
-export interface Base { }
 
 function mixinAspect<TBase, TAspect extends AspectBase>(base: Constructable<TBase>, override: (func: (...args) => any) => (...args) => any): Constructable<TAspect & TBase> {
-    let extended =  class extends (base as Constructable<Base>) {
+    let extended =  class extends (base as any) {
     };
 
     applyMixins(extended, ErrorAspect);
@@ -178,15 +177,15 @@ function mixinAspect<TBase, TAspect extends AspectBase>(base: Constructable<TBas
     return extended as any;
 }
 
-export function error<T extends Base>(base: Constructable<T>): Constructable<ErrorAspect & T>  {
+export function error<T>(base: Constructable<T>): Constructable<ErrorAspect & T>  {
     return mixinAspect<T, ErrorAspect>(base, ErrorAspect.prototype[overloadKey]);
 }
 
-export function surround<T extends Base>(base: Constructable<T>): Constructable<SurroundAspect & T> {
+export function surround<T>(base: Constructable<T>): Constructable<SurroundAspect & T> {
     return mixinAspect<T, SurroundAspect>(base, SurroundAspect.prototype[overloadKey]);
 }
 
-export function boundary<T extends Base>(base: Constructable<T>): Constructable<BoundaryAspect & T> {
+export function boundary<T>(base: Constructable<T>): Constructable<BoundaryAspect & T> {
     return mixinAspect<T, BoundaryAspect>(base, BoundaryAspect.prototype[overloadKey]);
 }
 
