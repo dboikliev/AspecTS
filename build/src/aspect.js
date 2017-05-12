@@ -58,9 +58,9 @@ function aspect(aspectObject, targetFlags = Target.All) {
     return function (...args) {
         switch (args.length) {
             case 1:
-                classAspect.call(this, ...args, aspectObject, targetFlags);
+                decorateClass.call(this, ...args, aspectObject, targetFlags);
                 if (targetFlags & Target.Constructor) {
-                    return constructorAspect.call(this, ...args, aspectObject);
+                    return decorateConstructor.call(this, ...args, aspectObject);
                 }
                 break;
             case 2:
@@ -69,7 +69,7 @@ function aspect(aspectObject, targetFlags = Target.All) {
                 if (args[2] === "number") {
                     throw Error("Cannot use aspect on parameters.");
                 }
-                functionAspect.call(this, ...args, aspectObject);
+                decorateFunction.call(this, ...args, aspectObject);
                 break;
             default:
                 throw Error("Cannot use aspect here.");
@@ -77,7 +77,7 @@ function aspect(aspectObject, targetFlags = Target.All) {
     };
 }
 exports.aspect = aspect;
-function classAspect(target, aspectObject, targetFlags) {
+function decorateClass(target, aspectObject, targetFlags) {
     let instanceDescriptors = getDescriptors(target.prototype, aspectObject);
     let staticDescriptors = getDescriptors(target, aspectObject);
     instanceDescriptors.forEach(({ key, descriptor }) => {
@@ -97,7 +97,7 @@ function classAspect(target, aspectObject, targetFlags) {
         }
     });
 }
-function constructorAspect(target, aspectObject) {
+function decorateConstructor(target, aspectObject) {
     let construct = function (...args) {
         return new target(...args);
     };
@@ -128,7 +128,7 @@ function getDescriptors(target, aspectObject) {
         .filter(key => key !== "constructor")
         .map(key => ({ key: key, descriptor: Object.getOwnPropertyDescriptor(target, key) }));
 }
-function functionAspect(target, key, descriptor, aspectObject) {
+function decorateFunction(target, key, descriptor, aspectObject) {
     if (descriptor.get || descriptor.set) {
         descriptor.get = descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined;
         descriptor.set = descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined;

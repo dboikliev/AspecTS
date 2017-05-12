@@ -68,9 +68,9 @@ export function aspect(aspectObject: AspectBase, targetFlags: number = Target.Al
     return function (...args) {
         switch (args.length) {
             case 1:
-                classAspect.call(this, ...args, aspectObject, targetFlags);
+                decorateClass.call(this, ...args, aspectObject, targetFlags);
                 if (targetFlags & Target.Constructor) {
-                    return constructorAspect.call(this, ...args, aspectObject);
+                    return decorateConstructor.call(this, ...args, aspectObject);
                 }
                 break;
             case 2:
@@ -79,7 +79,7 @@ export function aspect(aspectObject: AspectBase, targetFlags: number = Target.Al
                 if (args[2] === "number") {
                     throw Error("Cannot use aspect on parameters.");
                 }
-                functionAspect.call(this, ...args, aspectObject);
+                decorateFunction.call(this, ...args, aspectObject);
                 break;
             default:
                 throw Error("Cannot use aspect here.");
@@ -87,7 +87,7 @@ export function aspect(aspectObject: AspectBase, targetFlags: number = Target.Al
     };
 }
 
-function classAspect(target: Function, aspectObject: AspectBase, targetFlags: number) {
+function decorateClass(target: Function, aspectObject: AspectBase, targetFlags: number) {
     let instanceDescriptors = getDescriptors(target.prototype, aspectObject);
     let staticDescriptors = getDescriptors(target, aspectObject);
 
@@ -112,7 +112,7 @@ function classAspect(target: Function, aspectObject: AspectBase, targetFlags: nu
     });
 }
 
-function constructorAspect(target: { new(...args): AspectBase }, aspectObject: AspectBase) {
+function decorateConstructor(target: { new(...args): AspectBase }, aspectObject: AspectBase) {
     let construct = function (...args) {
         return new target(...args);
     }
@@ -148,7 +148,7 @@ function getDescriptors(target: any, aspectObject: AspectBase) {
         .map(key => ({ key: key, descriptor: Object.getOwnPropertyDescriptor(target, key) }));
 }
 
-function functionAspect(target: Function, key: string | symbol, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
+function decorateFunction(target: Function, key: string | symbol, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
     if (descriptor.get || descriptor.set) {
         descriptor.get = descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined;
         descriptor.set = descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined;
@@ -158,11 +158,9 @@ function functionAspect(target: Function, key: string | symbol, descriptor: Prop
     }
     return descriptor;
 }
-
 export interface Constructable<T> {
     new(...args): T;
 }
-
 
 function mixinAspect<TBase, TAspect extends AspectBase>(base: Constructable<TBase>, override: (func: (...args) => any) => (...args) => any): Constructable<TAspect & TBase> {
     let extended =  class extends (base as any) {

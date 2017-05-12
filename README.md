@@ -217,11 +217,11 @@ class TestClass {
         return testParameter;
     }
 
-    static get staticField() {
+    static get staticAccessor() {
         return this._testStaticField;
     }
 
-    static set staticField(value) {
+    static set staticAccessor(value) {
         this._testStaticField = value;
     }
 }
