@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
+const overrideKey = typeof Symbol === "function" ? Symbol() : "__overload";
 var Target;
 (function (Target) {
     Target[Target["InstanceMethods"] = 1] = "InstanceMethods";
@@ -13,13 +13,13 @@ var Target;
     Target[Target["All"] = 31] = "All";
 })(Target = exports.Target || (exports.Target = {}));
 class AspectBase {
-    [overloadKey](func) {
+    [overrideKey](func) {
         return func;
     }
 }
 exports.AspectBase = AspectBase;
 class BoundaryAspect {
-    [overloadKey](func) {
+    [overrideKey](func) {
         let onEntry = this.onEntry.bind(this);
         let onExit = this.onExit.bind(this);
         return function (...args) {
@@ -32,7 +32,7 @@ class BoundaryAspect {
 }
 exports.BoundaryAspect = BoundaryAspect;
 class ErrorAspect {
-    [overloadKey](func) {
+    [overrideKey](func) {
         let onError = this.onError.bind(this);
         return function (...args) {
             try {
@@ -46,7 +46,7 @@ class ErrorAspect {
 }
 exports.ErrorAspect = ErrorAspect;
 class SurroundAspect {
-    [overloadKey](func) {
+    [overrideKey](func) {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
             return onInvoke(func).apply(this, args);
@@ -103,22 +103,22 @@ function decorateConstructor(target, aspectObject) {
     };
     return new Proxy(target, {
         construct(target, argumentsList, newTarget) {
-            let result = aspectObject[overloadKey](construct)(argumentsList);
+            let result = aspectObject[overrideKey](construct)(argumentsList);
             return result;
         }
     });
 }
 function decorateAccessor(target, key, descriptor, aspectObject) {
     Object.defineProperty(target, key, {
-        get: descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined,
-        set: descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined,
+        get: descriptor.get ? aspectObject[overrideKey](descriptor.get) : undefined,
+        set: descriptor.set ? aspectObject[overrideKey](descriptor.set) : undefined,
         enumerable: descriptor.enumerable,
         configurable: descriptor.configurable,
     });
 }
 function decorateProperty(target, key, descriptor, aspectObject) {
     Object.defineProperty(target, key, {
-        value: aspectObject[overloadKey](descriptor.value),
+        value: aspectObject[overrideKey](descriptor.value),
         enumerable: descriptor.enumerable,
         configurable: descriptor.configurable,
     });
@@ -130,40 +130,37 @@ function getDescriptors(target, aspectObject) {
 }
 function decorateFunction(target, key, descriptor, aspectObject) {
     if (descriptor.get || descriptor.set) {
-        descriptor.get = descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined;
-        descriptor.set = descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined;
+        descriptor.get = descriptor.get ? aspectObject[overrideKey](descriptor.get) : undefined;
+        descriptor.set = descriptor.set ? aspectObject[overrideKey](descriptor.set) : undefined;
     }
     else if (descriptor.value) {
-        descriptor.value = aspectObject[overloadKey](descriptor.value);
+        descriptor.value = aspectObject[overrideKey](descriptor.value);
     }
     return descriptor;
 }
-function mixinAspect(base, override) {
+function mixinAspect(base, aspectPrototype) {
     let extended = class extends base {
     };
-    applyMixins(extended, ErrorAspect);
-    extended.prototype[overloadKey] = function (func) {
-        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = override.bind(this, f);
+    Object.getOwnPropertyNames(aspectPrototype).forEach(prop => {
+        extended.prototype[prop] = aspectPrototype[prop];
+    });
+    extended.prototype[overrideKey] = function (func) {
+        let f = base.prototype[overrideKey] ? base.prototype[overrideKey].call(this, func) : func;
+        let bound = aspectPrototype[overrideKey].bind(this, f);
         return bound();
     };
     return extended;
 }
 function error(base) {
-    return mixinAspect(base, ErrorAspect.prototype[overloadKey]);
+    return mixinAspect(base, ErrorAspect.prototype);
 }
 exports.error = error;
 function surround(base) {
-    return mixinAspect(base, SurroundAspect.prototype[overloadKey]);
+    return mixinAspect(base, SurroundAspect.prototype);
 }
 exports.surround = surround;
 function boundary(base) {
-    return mixinAspect(base, BoundaryAspect.prototype[overloadKey]);
+    return mixinAspect(base, BoundaryAspect.prototype);
 }
 exports.boundary = boundary;
-function applyMixins(targetClass, mixin) {
-    Object.getOwnPropertyNames(mixin.prototype).forEach(prop => {
-        targetClass.prototype[prop] = mixin.prototype[prop];
-    });
-}
 //# sourceMappingURL=aspect.js.map

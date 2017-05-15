@@ -1,6 +1,6 @@
 declare const Symbol: any;
 
-const overloadKey = typeof Symbol === "function" ? Symbol() : "__overload";
+const overrideKey = typeof Symbol === "function" ? Symbol() : "__overload";
 
 export enum Target {
     InstanceMethods = 1,
@@ -14,7 +14,7 @@ export enum Target {
 }
 
 export abstract class AspectBase {
-    protected [overloadKey](func: (...args) => any): (...args) => any {
+    protected [overrideKey](func: (...args) => any): (...args) => any {
         return func;
     }
 }
@@ -24,7 +24,7 @@ export abstract class BoundaryAspect implements AspectBase {
 
     abstract onExit(returnValue): any
 
-    [overloadKey](func: (...args) => any): (...args) => any {
+    [overrideKey](func: (...args) => any): (...args) => any {
         let onEntry = this.onEntry.bind(this);
         let onExit = this.onExit.bind(this);
 
@@ -40,7 +40,7 @@ export abstract class BoundaryAspect implements AspectBase {
 export abstract class ErrorAspect implements AspectBase {
     abstract onError(error: any);
 
-    [overloadKey](func: (...args) => any): (...args) => any {
+    [overrideKey](func: (...args) => any): (...args) => any {
         let onError = this.onError.bind(this);
         return function (...args) {
             try {
@@ -56,7 +56,7 @@ export abstract class ErrorAspect implements AspectBase {
 export abstract class SurroundAspect implements AspectBase {
     abstract onInvoke(func: Function): Function;
 
-    [overloadKey](func: (...args) => any): (...args) => any {
+    [overrideKey](func: (...args) => any): (...args) => any {
         let onInvoke = this.onInvoke.bind(this);
         return function (...args) {
             return onInvoke(func).apply(this, args);
@@ -119,7 +119,7 @@ function decorateConstructor(target: { new(...args): AspectBase }, aspectObject:
 
     return new Proxy(target, {
         construct(target, argumentsList, newTarget) {
-            let result = aspectObject[overloadKey](construct)(argumentsList);
+            let result = aspectObject[overrideKey](construct)(argumentsList);
             return result;
         }
     });
@@ -127,8 +127,8 @@ function decorateConstructor(target: { new(...args): AspectBase }, aspectObject:
 
 function decorateAccessor(target: Function, key: string, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
     Object.defineProperty(target, key, {
-        get: descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined,
-        set: descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined,
+        get: descriptor.get ? aspectObject[overrideKey](descriptor.get) : undefined,
+        set: descriptor.set ? aspectObject[overrideKey](descriptor.set) : undefined,
         enumerable: descriptor.enumerable,
         configurable: descriptor.configurable,
     });
@@ -136,7 +136,7 @@ function decorateAccessor(target: Function, key: string, descriptor: PropertyDes
 
 function decorateProperty(target: Function, key: string, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
     Object.defineProperty(target, key, {
-        value: aspectObject[overloadKey](descriptor.value),
+        value: aspectObject[overrideKey](descriptor.value),
         enumerable: descriptor.enumerable,
         configurable: descriptor.configurable,
     });
@@ -150,45 +150,43 @@ function getDescriptors(target: any, aspectObject: AspectBase) {
 
 function decorateFunction(target: Function, key: string | symbol, descriptor: PropertyDescriptor, aspectObject: AspectBase) {
     if (descriptor.get || descriptor.set) {
-        descriptor.get = descriptor.get ? aspectObject[overloadKey](descriptor.get) : undefined;
-        descriptor.set = descriptor.set ? aspectObject[overloadKey](descriptor.set) : undefined;
+        descriptor.get = descriptor.get ? aspectObject[overrideKey](descriptor.get) : undefined;
+        descriptor.set = descriptor.set ? aspectObject[overrideKey](descriptor.set) : undefined;
     }
     else if (descriptor.value) {
-        descriptor.value =  aspectObject[overloadKey](descriptor.value);
+        descriptor.value = aspectObject[overrideKey](descriptor.value);
     }
     return descriptor;
 }
+
 export interface Constructable<T> {
     new(...args): T;
 }
 
-function mixinAspect<TBase, TAspect extends AspectBase>(base: Constructable<TBase>, override: (func: (...args) => any) => (...args) => any): Constructable<TAspect & TBase> {
+function mixinAspect<TBase, TAspect extends AspectBase>(base: Constructable<TBase>, aspectPrototype): Constructable<TAspect & TBase> {
     let extended =  class extends (base as any) {
     };
 
-    applyMixins(extended, ErrorAspect);
-    extended.prototype[overloadKey] = function (func: (...args) => any): (...args) => any {
-        let f = base.prototype[overloadKey] ? base.prototype[overloadKey].call(this, func) : func;
-        let bound = override.bind(this, f);
+    Object.getOwnPropertyNames(aspectPrototype).forEach(prop => {
+        extended.prototype[prop] = aspectPrototype[prop];
+    });
+
+    extended.prototype[overrideKey] = function (func: (...args) => any): (...args) => any {
+        let f = base.prototype[overrideKey] ? base.prototype[overrideKey].call(this, func) : func;
+        let bound = aspectPrototype[overrideKey].bind(this, f);
         return bound();
     }
     return extended as any;
 }
 
 export function error<T>(base: Constructable<T>): Constructable<ErrorAspect & T>  {
-    return mixinAspect<T, ErrorAspect>(base, ErrorAspect.prototype[overloadKey]);
+    return mixinAspect<T, ErrorAspect>(base, ErrorAspect.prototype);
 }
 
 export function surround<T>(base: Constructable<T>): Constructable<SurroundAspect & T> {
-    return mixinAspect<T, SurroundAspect>(base, SurroundAspect.prototype[overloadKey]);
+    return mixinAspect<T, SurroundAspect>(base, SurroundAspect.prototype);
 }
 
 export function boundary<T>(base: Constructable<T>): Constructable<BoundaryAspect & T> {
-    return mixinAspect<T, BoundaryAspect>(base, BoundaryAspect.prototype[overloadKey]);
-}
-
-function applyMixins(targetClass: Function, mixin: Function) {
-    Object.getOwnPropertyNames(mixin.prototype).forEach(prop => {
-        targetClass.prototype[prop] = mixin.prototype[prop];
-    });
+    return mixinAspect<T, BoundaryAspect>(base, BoundaryAspect.prototype);
 }
