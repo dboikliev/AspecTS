@@ -75,7 +75,7 @@ doSomething's result.5
 ####  2. SurroundAspect:<a id="surround"></a>
 
 The `SurroundAspect` class provides a method for intercepting a function invocation.
-`onInvoke` function recieves as paramerameter the decoratad function and returns a new function.
+`onInvoke` function recieves as paramerameter the decorated function and returns a new function.
 This aspect is most suitable for cases where you  want to place code around the method, hence the name.
 
 ```typescript
