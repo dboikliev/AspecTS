@@ -8,8 +8,8 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}\\src\\app.ts",
-            "outFiles": ["${workspaceRoot}\\build\\src\\app.js", "${workspaceRoot}\\build\\src\\aspect.js"],
+            "program": "${workspaceRoot}/src/app.ts",
+            "outFiles": ["${workspaceRoot}/build/src/app.js", "${workspaceRoot}/build/src/aspect.js"],
             "protocol": "inspector"
         }
     ]
