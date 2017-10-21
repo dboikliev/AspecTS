@@ -96,4 +96,31 @@ describe("boundary aspect tests", () => {
         assert.deepStrictEqual(originalReturnValue, receivedReturnValue);
     });
 });
+describe("surround aspect tests", () => {
+    it("should be executed before and after decorated method", () => {
+        let isPreconditionMet = false;
+        let isPostconditionMet = false;
+        class TestAspect extends aspect_1.SurroundAspect {
+            onInvoke(func) {
+                return function (...args) {
+                    isPreconditionMet = true;
+                    let result = func.apply(this, args);
+                    isPostconditionMet = true;
+                    return result;
+                };
+            }
+        }
+        let TestSubject = class TestSubject {
+            testMethod() {
+            }
+        };
+        TestSubject = __decorate([
+            aspect_1.aspect(new TestAspect())
+        ], TestSubject);
+        let test = new TestSubject();
+        test.testMethod();
+        assert(isPreconditionMet, "The precondition is not set.");
+        assert(isPostconditionMet, "The postcondition is not set.");
+    });
+});
 //# sourceMappingURL=test.js.map

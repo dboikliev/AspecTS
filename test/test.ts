@@ -3,7 +3,8 @@ import * as assert from "assert";
 import {
     aspect,
     ErrorAspect,
-    BoundaryAspect
+    BoundaryAspect,
+    SurroundAspect
 } from "./../src/aspect";
 
 describe("error aspect tests", () => {
@@ -108,5 +109,35 @@ describe("boundary aspect tests", () => {
 
         assert.deepStrictEqual(originalArguments, receivedArguments);
         assert.deepStrictEqual(originalReturnValue, receivedReturnValue);
+    });
+});
+
+describe("surround aspect tests", () => {
+    it("should be executed before and after decorated method", () => {
+        let isPreconditionMet = false;
+        let isPostconditionMet = false;
+
+        class TestAspect extends SurroundAspect {
+            onInvoke(func: Function): Function {
+                return function (...args) {
+                    isPreconditionMet = true;
+                    let result = func.apply(this, args);
+                    isPostconditionMet = true;
+                    return result;
+                }
+            }
+        }
+
+        @aspect(new TestAspect())
+        class TestSubject {
+            testMethod() {
+            }
+        }  
+        
+        let test = new TestSubject();
+        test.testMethod();
+
+        assert(isPreconditionMet, "The precondition is not set.");
+        assert(isPostconditionMet, "The postcondition is not set.");
     });
 });

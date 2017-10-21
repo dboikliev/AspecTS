@@ -7,61 +7,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const aspect_1 = require("./aspect");
-class BaseLogger {
-    constructor() {
-        this._logger = console;
-    }
-}
-class LoggerAspect extends aspect_1.error(aspect_1.surround(aspect_1.boundary(BaseLogger))) {
-    onError(e) {
-        this._logger.log("ERROR: " + e.message);
-    }
-    onEntry(...args) {
-        this._logger.log("ENTRY: " + args.join(","));
-        return args;
-    }
-    onExit(returnValue) {
-        this._logger.log("EXIT: " + returnValue);
-        return returnValue;
-    }
+class TestAspect extends aspect_1.SurroundAspect {
     onInvoke(func) {
-        let logger = this._logger;
         return function (...args) {
-            logger.log("INVOKE BEGIN");
             let result = func.apply(this, args);
-            logger.log("INVOKE END");
             return result;
         };
     }
 }
-let TestClass = class TestClass {
-    constructor() {
-        // throw Error("Test error.");
-    }
-    get instanceAccessor() {
-        return this._testField;
-    }
-    set instanceAccessor(value) {
-        this._testField = value;
-    }
-    instanceMethod(testParameter) {
-        return testParameter;
-    }
-    static staticMethod(testParameter) {
-        return testParameter;
-    }
-    static get staticField() {
-        return this._testStaticField;
-    }
-    static set staticField(value) {
-        this._testStaticField = value;
+let TestSubject = class TestSubject {
+    testMethod() {
     }
 };
-TestClass = __decorate([
-    aspect_1.aspect(new LoggerAspect(), aspect_1.Target.All)
-], TestClass);
-let instance = new TestClass();
-instance.instanceMethod(1);
-console.log("-".repeat(20));
-TestClass.staticMethod(1);
+TestSubject = __decorate([
+    aspect_1.aspect(new TestAspect())
+], TestSubject);
+let test = new TestSubject();
+test.testMethod();
 //# sourceMappingURL=app.js.map
