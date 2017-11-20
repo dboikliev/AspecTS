@@ -8,6 +8,7 @@ import {
     boundary,
     error
 } from "./aspect";
+import { print } from "util";
 
 interface CachingService<T> {
     get(id: string | number): T
@@ -44,31 +45,33 @@ class MemoryCache<T> implements CachingService<T> {
 }
 
 class Cached<T> extends SurroundAspect {
-    constructor(private cachingService: CachingService<T>) {
+    constructor(private cachingService: CachingService<T>,
+                private period?: number) {
         super();
     }
 
     onInvoke(func: Function): Function {
         const cache = this.cachingService;
+        const period = this.period;
         return function (id: string | number) {
             if (cache.has(id)) {
                 return cache.get(id);
             }
             const result = func.call(this, id);
-            cache.set(id, result);
+            cache.set(id, result, period);
             return result;
         }
     }
 }
 
-function createCachingAspect<T>(cachingService: CachingService<T>) {
-    return aspect.bind(null, new Cached(cachingService), Target.All ^ Target.Constructor);
+function cached<T>(cachingService: CachingService<T>, period?: number) {
+    return aspect.call(null, new Cached(cachingService, period), Target.All ^ Target.Constructor);
 }
 
-const cachingAspect = createCachingAspect(new MemoryCache<User>())
+const cachingService = new MemoryCache<User>();
 
-@cachingAspect()
 class UserService {
+    @cached(cachingService, 1000)
     getUserById(id: number): User {
         console.log("In get user by id");
         return {
@@ -86,4 +89,8 @@ interface User {
 const us = new UserService
 const first = us.getUserById(1)
 const second = us.getUserById(1);
-console.log(first == second);
+console.log(first == second) //true - still in cache
+setTimeout(() => {
+    const third = us.getUserById(1)
+    console.log(first == third) //false - cache invalidated
+}, 2000)

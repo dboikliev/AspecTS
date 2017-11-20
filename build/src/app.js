@@ -32,27 +32,29 @@ class MemoryCache {
     }
 }
 class Cached extends aspect_1.SurroundAspect {
-    constructor(cachingService) {
+    constructor(cachingService, period) {
         super();
         this.cachingService = cachingService;
+        this.period = period;
     }
     onInvoke(func) {
         const cache = this.cachingService;
+        const period = this.period;
         return function (id) {
             if (cache.has(id)) {
                 return cache.get(id);
             }
             const result = func.call(this, id);
-            cache.set(id, result);
+            cache.set(id, result, period);
             return result;
         };
     }
 }
-function createCachingAspect(cachingService) {
-    return aspect_1.aspect.bind(null, new Cached(cachingService), aspect_1.Target.All ^ aspect_1.Target.Constructor);
+function cached(cachingService, period) {
+    return aspect_1.aspect.call(null, new Cached(cachingService, period), aspect_1.Target.All ^ aspect_1.Target.Constructor);
 }
-const cachingAspect = createCachingAspect(new MemoryCache());
-let UserService = class UserService {
+const cachingService = new MemoryCache();
+class UserService {
     getUserById(id) {
         console.log("In get user by id");
         return {
@@ -60,12 +62,16 @@ let UserService = class UserService {
             age: 21
         };
     }
-};
-UserService = __decorate([
-    cachingAspect()
-], UserService);
+}
+__decorate([
+    cached(cachingService, 1000)
+], UserService.prototype, "getUserById", null);
 const us = new UserService;
 const first = us.getUserById(1);
 const second = us.getUserById(1);
-console.log(first == second);
+console.log(first == second); //true - still in cache
+setTimeout(() => {
+    const third = us.getUserById(1);
+    console.log(first == third); //false - cache invalidated
+}, 2000);
 //# sourceMappingURL=app.js.map
