@@ -32,26 +32,38 @@ class MemoryCache {
     }
 }
 class Cached extends aspect_1.SurroundAspect {
-    constructor(cachingService, period) {
+    constructor(cachingService, keyIndex, invalidate, period) {
         super();
         this.cachingService = cachingService;
+        this.keyIndex = keyIndex;
+        this.invalidate = invalidate;
         this.period = period;
     }
     onInvoke(func) {
         const cache = this.cachingService;
         const period = this.period;
-        return function (id) {
-            if (cache.has(id)) {
+        const keyIndex = this.keyIndex;
+        const invalidate = this.invalidate;
+        return function (...args) {
+            const id = args[keyIndex];
+            if (invalidate) {
+                cache.invalidate(id);
+                const result = func.apply(this, args);
+                return result;
+            }
+            else if (cache.has(id)) {
                 return cache.get(id);
             }
-            const result = func.call(this, id);
-            cache.set(id, result, period);
-            return result;
+            else {
+                const result = func.apply(this, args);
+                cache.set(id, result, period);
+                return result;
+            }
         };
     }
 }
-function cached(cachingService, period) {
-    return aspect_1.aspect.call(null, new Cached(cachingService, period), aspect_1.Target.All ^ aspect_1.Target.Constructor);
+function cached(cachingService, keyIndex, invalidate, period) {
+    return aspect_1.aspect.call(null, new Cached(cachingService, keyIndex, invalidate, period), aspect_1.Target.All ^ aspect_1.Target.Constructor);
 }
 const cachingService = new MemoryCache();
 class UserService {
@@ -62,12 +74,21 @@ class UserService {
             age: 21
         };
     }
+    setUserById(id, user) {
+    }
 }
 __decorate([
-    cached(cachingService, 1000)
+    cached(cachingService, 0, false, 1000)
 ], UserService.prototype, "getUserById", null);
+__decorate([
+    cached(cachingService, 0, true, 1000)
+], UserService.prototype, "setUserById", null);
 const us = new UserService;
 const first = us.getUserById(1);
+us.setUserById(1, {
+    name: "bla",
+    age: 23
+});
 const second = us.getUserById(1);
 console.log(first == second); //true - still in cache
 setTimeout(() => {

@@ -46,6 +46,8 @@ class MemoryCache<T> implements CachingService<T> {
 
 class Cached<T> extends SurroundAspect {
     constructor(private cachingService: CachingService<T>,
+                private keyIndex: number,
+                private invalidate: boolean,
                 private period?: number) {
         super();
     }
@@ -53,31 +55,51 @@ class Cached<T> extends SurroundAspect {
     onInvoke(func: Function): Function {
         const cache = this.cachingService;
         const period = this.period;
-        return function (id: string | number) {
-            if (cache.has(id)) {
-                return cache.get(id);
+        const keyIndex = this.keyIndex;
+        const invalidate = this.invalidate;
+        return function (...args) {
+            const id = args[keyIndex]
+            if (invalidate) {
+                cache.invalidate(id);
+                const result = func.apply(this, args)
+                return result
             }
-            const result = func.call(this, id);
-            cache.set(id, result, period);
-            return result;
+            else if (cache.has(id)) {
+                return cache.get(id)
+            }
+            else {
+                const result = func.apply(this, args)
+                cache.set(id, result, period)
+                return result
+            }
         }
     }
 }
 
-function cached<T>(cachingService: CachingService<T>, period?: number) {
-    return aspect.call(null, new Cached(cachingService, period), Target.All ^ Target.Constructor);
+function cached<T>(cachingService: CachingService<T>,
+                   keyIndex: number, 
+                   invalidate: boolean,
+                   period?: number) {
+    return aspect.call(null, 
+                       new Cached(cachingService, keyIndex, invalidate, period), 
+                       Target.All ^ Target.Constructor);
 }
 
 const cachingService = new MemoryCache<User>();
 
 class UserService {
-    @cached(cachingService, 1000)
+    @cached(cachingService, 0, false, 1000)
     getUserById(id: number): User {
         console.log("In get user by id");
         return {
             name: "Ivan",
             age: 21
         }
+    }
+
+    @cached(cachingService, 0, true, 1000)
+    setUserById(id: number, user: User) {
+        
     }
 }
 
@@ -88,8 +110,16 @@ interface User {
 
 const us = new UserService
 const first = us.getUserById(1)
+
+us.setUserById(1, {
+    name: "bla",
+    age: 23
+})
+
 const second = us.getUserById(1);
 console.log(first == second) //true - still in cache
+
+
 setTimeout(() => {
     const third = us.getUserById(1)
     console.log(first == third) //false - cache invalidated
