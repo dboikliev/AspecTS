@@ -337,7 +337,10 @@ us.setUserById(1, {
 })
 
 const second = us.getUserById(1);
-console.log(first == second) //false - cache was invalidated by set method.
+console.log(first == second) //false - cache was invalidated by set method
+
+const third = us.getUserById(1);
+console.log(second == third) //true - result was cached during previous call
 
 setTimeout(() => {
     const third = us.getUserById(1)
