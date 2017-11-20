@@ -6,10 +6,16 @@ An [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_p
 
 ## Supported aspects:
 
-1. [BoundaryAspect](#boundary)
-2. [SurroundAspect](#surround)
-3. [ErrorAspect](#error)
-4. [Aspect mixins](#mixins)
+### Basic aspects:
+
+* [BoundaryAspect](#boundary)
+* [SurroundAspect](#surround)
+* [ErrorAspect](#error)
+* [Aspect mixins](#mixins)
+
+### Advanced aspects:
+
+* [Caching](#caching)
 
 ## Supported targets:
 
@@ -23,9 +29,9 @@ It is possible to choose only specific members using the `Target` enum.
 4. Static accessors
 5. Constructor
 
-## Examples:
+## Basic Aspects Examples:
 
-#### 1. BounaryAspect:<a id="boundary"></a>
+#### BounaryAspect:<a id="boundary"></a>
 
 The `BoundaryAspect` class provides method for intercepting the places of entry and exit of functions.
 Classes inheriting from `BoundaryAspect` can provide custom iplementations to `onEntry` and/or `onExit`.
@@ -72,7 +78,7 @@ On Exit.
 doSomething's result.5
 ```
 
-####  2. SurroundAspect:<a id="surround"></a>
+####  SurroundAspect:<a id="surround"></a>
 
 The `SurroundAspect` class provides a method for intercepting a function invocation.
 `onInvoke` function recieves as paramerameter the decorated function and returns a new function.
@@ -113,7 +119,7 @@ surrounded.
 doSomething's result.
 ```
 
-#### 3. ErrorAspect:<a id="error"></a>
+#### ErrorAspect:<a id="error"></a>
 
 The ErrorAspect provides an `onError` function which is called when the decorated function throws an error.
 `onError` receives as argument the caught object which the decorated function has thrown.
@@ -145,7 +151,7 @@ test.doSomething();
 LOGGED ERROR: Something went wrong while doing something.
 ```
 
-#### 4. Aspect mixins:<a id="mixins"></a>
+#### Aspect mixins:<a id="mixins"></a>
 
 The `surround`, `boundary`, `error` methods allow the creation of a new aspect by combining joint points of `SurroundAspect`, `BoundaryAspect` and `ErrorAspect`.
 
@@ -247,7 +253,7 @@ INVOKE END
 ```
 
 
-#### 5. Target<a id="target"></a>
+#### Target:<a id="target"></a>
 
 Target is a bitfalgs enum which contains the possible targets for an aspect.
 Targets can be combined with the bitwise-or operator ( | ).
@@ -286,4 +292,55 @@ class TestClass {
         this._testStaticField = value;
     }
 }
+```
+
+## Advanced Aspects Examples:
+
+You can use the basic types of aspects to build more complex solutions like caching, logging etc.
+
+#### Caching:<a id="caching"></a>
+
+The `cache` and `invalidateCache` functions are supposed to be used on methods. Both functions expenct and instance of a caching service - the cache wich will hold the data. The cache functions also exptects a `keyIndex` - the index of the method argument which will be used as a key in the cache and an optional `period` parameter - the time in milliseconds after which the cache will expire. Calling a method marked with the `invalidateCache` decorator will cause the cache at the specified index to be removed. 
+
+```typescript
+import { cache, invalidateCache, MemoryCache } from "./caching"
+
+const cachingService = new MemoryCache<User>();
+
+class UserService {
+    @cache(cachingService, 0, 1000)
+    getUserById(id: number): User {
+        console.log("In get user by id");
+        return {
+            name: "Ivan",
+            age: 21
+        }
+    }
+
+    @invalidateCache(cachingService, 0)
+    setUserById(id: number, user: User) {
+        
+    }
+}
+
+interface User {
+    name: string,
+    age: number
+}
+
+const us = new UserService()
+const first = us.getUserById(1)
+
+us.setUserById(1, {
+    name: "bla",
+    age: 23
+})
+
+const second = us.getUserById(1);
+console.log(first == second) //false - cache was invalidated by set method.
+
+setTimeout(() => {
+    const third = us.getUserById(1)
+    console.log(first == third) //false - cache expired
+}, 2000)
 ```
