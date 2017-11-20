@@ -1,4 +1,4 @@
-export declare type Id = string | number | string[] | number[];
+export declare type Id = string | number;
 export interface CachingService<T> {
     get(id: Id): T;
     set(id: Id, element: T, period?: number): void;

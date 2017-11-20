@@ -1,6 +1,6 @@
 import { aspect, SurroundAspect, Target } from "./aspect";
 
-export type Id = string | number | string[] | number[];
+export type Id = string | number;
 
 export interface CachingService<T> {
     get(id: Id): T
