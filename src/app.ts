@@ -39,5 +39,5 @@ console.log(second == third) //true - result was cached during previous call
 
 setTimeout(() => {
     const fourth = us.getUserById(1)
-    console.log(first == fourth) //false - cache expired
+    console.log(third == fourth) //false - cache expired
 }, 2000)
