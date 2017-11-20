@@ -43,7 +43,7 @@ class MemoryCache<T> implements CachingService<T> {
     }
 }
 
-class Cached<T> extends SurroundAspect {
+class Cache<T> extends SurroundAspect {
     constructor(private cachingService: CachingService<T>,
                 private keyIndex: number,
                 private invalidate: boolean,
@@ -78,15 +78,13 @@ class Cached<T> extends SurroundAspect {
 function cache<T>(cachingService: CachingService<T>,
                    keyIndex: number, 
                    period?: number) {
-    return aspect.call(null, 
-                       new Cached(cachingService, keyIndex, false, period), 
+    return aspect(new Cache(cachingService, keyIndex, false, period), 
                        Target.All ^ Target.Constructor);
 }
 
 function invalidateCache<T>(cachingService: CachingService<T>,
     keyIndex: number) {
-    return aspect.call(null, 
-                       new Cached(cachingService, keyIndex, true), 
+    return aspect(new Cache(cachingService, keyIndex, true), 
                        Target.All ^ Target.Constructor);
 }
 
