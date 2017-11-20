@@ -76,19 +76,25 @@ class Cached<T> extends SurroundAspect {
     }
 }
 
-function cached<T>(cachingService: CachingService<T>,
+function cache<T>(cachingService: CachingService<T>,
                    keyIndex: number, 
-                   invalidate: boolean,
                    period?: number) {
     return aspect.call(null, 
-                       new Cached(cachingService, keyIndex, invalidate, period), 
+                       new Cached(cachingService, keyIndex, false, period), 
+                       Target.All ^ Target.Constructor);
+}
+
+function invalidateCache<T>(cachingService: CachingService<T>,
+    keyIndex: number) {
+    return aspect.call(null, 
+                       new Cached(cachingService, keyIndex, true), 
                        Target.All ^ Target.Constructor);
 }
 
 const cachingService = new MemoryCache<User>();
 
 class UserService {
-    @cached(cachingService, 0, false, 1000)
+    @cache(cachingService, 0, 1000)
     getUserById(id: number): User {
         console.log("In get user by id");
         return {
@@ -97,7 +103,7 @@ class UserService {
         }
     }
 
-    @cached(cachingService, 0, true, 1000)
+    @invalidateCache(cachingService, 0)
     setUserById(id: number, user: User) {
         
     }

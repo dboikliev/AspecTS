@@ -62,8 +62,11 @@ class Cached extends aspect_1.SurroundAspect {
         };
     }
 }
-function cached(cachingService, keyIndex, invalidate, period) {
-    return aspect_1.aspect.call(null, new Cached(cachingService, keyIndex, invalidate, period), aspect_1.Target.All ^ aspect_1.Target.Constructor);
+function cache(cachingService, keyIndex, period) {
+    return aspect_1.aspect.call(null, new Cached(cachingService, keyIndex, false, period), aspect_1.Target.All ^ aspect_1.Target.Constructor);
+}
+function invalidateCache(cachingService, keyIndex) {
+    return aspect_1.aspect.call(null, new Cached(cachingService, keyIndex, true), aspect_1.Target.All ^ aspect_1.Target.Constructor);
 }
 const cachingService = new MemoryCache();
 class UserService {
@@ -78,10 +81,10 @@ class UserService {
     }
 }
 __decorate([
-    cached(cachingService, 0, false, 1000)
+    cache(cachingService, 0, 1000)
 ], UserService.prototype, "getUserById", null);
 __decorate([
-    cached(cachingService, 0, true, 1000)
+    invalidateCache(cachingService, 0)
 ], UserService.prototype, "setUserById", null);
 const us = new UserService;
 const first = us.getUserById(1);
