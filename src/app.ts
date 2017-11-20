@@ -9,25 +9,27 @@ import {
     error
 } from "./aspect";
 
+type Id = string | number;
+
 interface CachingService<T> {
-    get(id: string | number): T
-    set(id: string | number, element: T, period?: number): void
-    has(id: string | number): boolean
-    invalidate(id: string | number): void
+    get(id: Id): T
+    set(id: Id, element: T, period?: number): void
+    has(id: Id): boolean
+    invalidate(id: Id): void
 }
 
 class MemoryCache<T> implements CachingService<T> {
-    private elements: Map<string | number, T> = new Map();
+    private elements: Map<Id, T> = new Map();
 
-    get(id: string | number): T {
+    get(id: Id): T {
         return this.elements.get(id);
     }
 
-    has(id: string | number): boolean {
+    has(id: Id): boolean {
         return this.elements.has(id);
     }
 
-    set(id: string | number, element: T, period?: number): void {
+    set(id: Id, element: T, period?: number): void {
         this.elements.set(id, element);
         if (typeof period !== "undefined") {
             setTimeout((cache: MemoryCache<T>) => {
@@ -36,7 +38,7 @@ class MemoryCache<T> implements CachingService<T> {
         }
     }
 
-    invalidate(id: string | number): void {
+    invalidate(id: Id): void {
         if (this.elements.has(id)) {
             this.elements.delete(id);
         }
