@@ -164,14 +164,13 @@ export interface Constructable<T> {
 }
 
 function mixinAspect<TBase, TAspect extends AspectBase>(base: Constructable<TBase>, aspectPrototype): Constructable<TAspect & TBase> {
-    let extended =  class extends (base as any) {
-    };
+    let extended =  class extends (base as any) { };
 
     Object.getOwnPropertyNames(aspectPrototype).forEach(prop => {
         extended.prototype[prop] = aspectPrototype[prop];
     });
 
-    extended.prototype[overrideKey] = function (func: (...args) => any): (...args) => any {
+    extended.prototype[overrideKey] = function (func: Function): Function {
         let f = base.prototype[overrideKey] ? base.prototype[overrideKey].call(this, func) : func;
         let bound = aspectPrototype[overrideKey].bind(this, f);
         return bound();
