@@ -23,11 +23,11 @@ The aspects can be applied on methods or [on the class itself](#target).
 When applied on a class the aspect is applied on **all** instance and static members and accessors and on the constructor.
 It is possible to choose only specific members using the `Target` enum.
 
-1. Instance methods
-2. Static methods
-3. Instance accessors
-4. Static accessors
-5. Constructor
+* Instance methods
+* Static methods
+* Instance accessors
+* Static accessors
+* Constructor
 
 ## Basic Aspects Examples:
 
