@@ -31,7 +31,7 @@ It is possible to choose only specific members using the `Target` enum.
 
 ## Basic Aspects Examples:
 
-#### BounaryAspect:<a id="boundary"></a>
+#### BoundaryAspect:<a id="boundary"></a>
 
 The `BoundaryAspect` class provides method for intercepting the places of entry and exit of functions.
 Classes inheriting from `BoundaryAspect` can provide custom iplementations to `onEntry` and/or `onExit`.
