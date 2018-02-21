@@ -255,7 +255,7 @@ INVOKE END
 
 #### Target:<a id="target"></a>
 
-Target is a bitfalgs enum which contains the possible targets for an aspect.
+Target is a bit flags enum which contains the possible targets for an aspect.
 Targets can be combined with the bitwise-or operator ( | ).
 
 ```typescript
