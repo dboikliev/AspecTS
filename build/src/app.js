@@ -11,11 +11,10 @@ const repeat_1 = require("./repeat");
 const cachingService = new cache_1.MemoryCache();
 class UserService {
     constructor() {
-        this.count = 10;
+        this.count = 3;
     }
     getUserById(id) {
         console.log("In get user by id");
-        console.log(this);
         if (this.count > 0) {
             this.count--;
             throw Error("Err");
@@ -30,23 +29,12 @@ class UserService {
 }
 __decorate([
     cache_1.cache(cachingService, 0, 1000),
-    repeat_1.repeatOnError(5, 100)
+    repeat_1.repeatOnError(5, 100, true)
 ], UserService.prototype, "getUserById", null);
 __decorate([
     cache_1.invalidateCache(cachingService, 0)
 ], UserService.prototype, "setUserById", null);
-const us = new UserService;
-const first = us.getUserById(1);
-us.setUserById(1, {
-    name: "bla",
-    age: 23
-});
-// const second = us.getUserById(1);
-// console.log(first == second) //false - cache was invalidated by set method
-// const third = us.getUserById(1);
-// console.log(second == third) //true - result was cached during previous call 
-// setTimeout(() => {
-//     const fourth = us.getUserById(1)
-//     console.log(third == fourth) //false - cache expired
-// }, 2000) 
+const us = new UserService();
+let user = us.getUserById(1);
+console.log(user);
 //# sourceMappingURL=app.js.map
