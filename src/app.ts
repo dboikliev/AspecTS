@@ -1,11 +1,22 @@
-import { cache, invalidateCache, MemoryCache } from "./caching"
+import { cache, invalidateCache, MemoryCache } from "./cache"
+import { repeatOnError } from "./repeat";
 
 const cachingService = new MemoryCache<User>();
 
 class UserService {
+    private count: number = 10;
+
     @cache(cachingService, 0, 1000)
+    @repeatOnError(5, 100)    
     getUserById(id: number): User {
+
         console.log("In get user by id");
+        console.log(this);
+        if (this.count > 0) {
+            this.count--;
+            throw Error("Err");
+        }
+
         return {
             name: "Ivan",
             age: 21
@@ -31,13 +42,13 @@ us.setUserById(1, {
     age: 23
 })
 
-const second = us.getUserById(1);
-console.log(first == second) //false - cache was invalidated by set method
+// const second = us.getUserById(1);
+// console.log(first == second) //false - cache was invalidated by set method
 
-const third = us.getUserById(1);
-console.log(second == third) //true - result was cached during previous call 
+// const third = us.getUserById(1);
+// console.log(second == third) //true - result was cached during previous call 
 
-setTimeout(() => {
-    const fourth = us.getUserById(1)
-    console.log(third == fourth) //false - cache expired
-}, 2000)
+// setTimeout(() => {
+//     const fourth = us.getUserById(1)
+//     console.log(third == fourth) //false - cache expired
+// }, 2000)
