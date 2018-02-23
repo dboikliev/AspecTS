@@ -399,9 +399,11 @@ console.log(user)
 
 #### Output:
 
+```
 In get user by id
 In get user by id
 In get user by id
 In get user by id
 
 Object {name: "Ivan", age: 21}
+```
