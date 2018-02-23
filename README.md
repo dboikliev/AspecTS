@@ -16,6 +16,7 @@ An [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_p
 ### Advanced aspects:
 
 * [Caching](#caching)
+* [Repeating](#repeating)
 
 ## Supported targets:
 
@@ -302,6 +303,8 @@ You can use the basic types of aspects to build more complex solutions like cach
 
 The `cache` and `invalidateCache` functions are supposed to be used on methods. Both functions expenct and instance of a caching service - the cache wich will hold the data. The cache functions also exptects a `keyIndex` - the index of the method argument which will be used as a key in the cache and an optional `period` parameter - the time in milliseconds after which the cache will expire. Calling a method marked with the `invalidateCache` decorator will cause the cache at the specified index to be removed. 
 
+#### Example:
+
 ```typescript
 import { cache, invalidateCache, MemoryCache } from "./caching"
 
@@ -328,7 +331,7 @@ interface User {
     age: number
 }
 
-const us = new UserService
+const us = new UserService()
 const first = us.getUserById(1)
 
 us.setUserById(1, {
@@ -347,3 +350,58 @@ setTimeout(() => {
     console.log(third == fourth) //false - cache expired
 }, 2000)
 ```
+
+#### Repeating:<a id="repeating"></a>
+
+The `repeatOnError` aspect allos code to be executed a maximumg of `count` times with delays between calls of `interval` milliseconds. The repeater can be set to block until all repetitions are over by setting the `wait` parameter to `true`.
+
+#### Example:
+
+```typescript
+import { cache, invalidateCache, MemoryCache } from "./cache"
+import { repeatOnError } from "./repeat";
+
+const cachingService = new MemoryCache<User>();
+
+class UserService {
+    private count: number = 3;
+
+    @cache(cachingService, 0, 1000)
+    @repeatOnError(5, 100, true)    
+    getUserById(id: number): User {
+        console.log("In get user by id");
+        if (this.count > 0) {
+            this.count--;
+            throw Error("Err");
+        }
+
+        return {
+            name: "Ivan",
+            age: 21
+        };
+    }
+
+    @invalidateCache(cachingService, 0)
+    setUserById(id: number, user: User) {
+        
+    }
+}
+
+interface User {
+    name: string,
+    age: number
+}
+
+const us = new UserService()
+let user = us.getUserById(1)
+console.log(user)
+```
+
+#### Output:
+
+In get user by id
+In get user by id
+In get user by id
+In get user by id
+
+Object {name: "Ivan", age: 21}
