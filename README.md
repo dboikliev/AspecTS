@@ -30,7 +30,7 @@ It is possible to choose only specific members using the `Target` enum.
 * Static accessors
 * Constructor
 
-## Basic Aspects Examples:
+## Basic aspects examples:
 
 #### BoundaryAspect:<a id="boundary"></a>
 
