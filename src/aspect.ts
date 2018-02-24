@@ -112,7 +112,7 @@ function decorateClass(target: Function, aspectObject: AspectBase, targetFlags: 
     });
 }
 
-function decorateConstructor(target: { new(...args): AspectBase }, aspectObject: AspectBase) {
+function decorateConstructor(target: Constructable<AspectBase> , aspectObject: AspectBase) {
     let construct = function (...args) {
         return new target(...args);
     }
