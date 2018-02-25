@@ -69,7 +69,7 @@ let test = new Test();
 console.log(test.doSomething(1));
 ```
 
-#### Result:
+#### Output:
 
 ```
 On Entry.
@@ -111,7 +111,7 @@ let test = new Test();
 console.log(test.doSomething(1));
 ```
 
-#### Result:
+#### Output:
 
 ```
 You've been
@@ -146,7 +146,7 @@ let test = new Test();
 test.doSomething();
 ```
 
-#### Result:
+#### Output:
 
 ```
 LOGGED ERROR: Something went wrong while doing something.
@@ -240,7 +240,7 @@ console.log("-".repeat(20));
 TestClass.staticMethod(1);
 ```
 
-#### Result:
+#### Output:
 
 ```
 INVOKE BEGIN
