@@ -1,6 +1,6 @@
 declare const Symbol: any;
 
-const overrideKey = typeof Symbol === "function" ? Symbol() : "__overload";
+const overrideKey = typeof Symbol === "function" ? Symbol() : "__override";
 
 export enum Target {
     InstanceMethods = 1,
