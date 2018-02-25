@@ -20,11 +20,6 @@ class UserService {
             age: 21
         };
     }
-
-    @invalidateCache(cachingService, 0)
-    setUserById(id: number, user: User) {
-        
-    }
 }
 
 interface User {
@@ -33,5 +28,9 @@ interface User {
 }
 
 const us = new UserService()
+
 let user = us.getUserById(1)
+let cached = us.getUserById(1)
+
 console.log(user)
+console.log("Is cached: ", user == cached) 

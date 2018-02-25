@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const overrideKey = typeof Symbol === "function" ? Symbol() : "__overload";
+const overrideKey = typeof Symbol === "function" ? Symbol() : "__override";
 var Target;
 (function (Target) {
     Target[Target["InstanceMethods"] = 1] = "InstanceMethods";

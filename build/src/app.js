@@ -24,17 +24,14 @@ class UserService {
             age: 21
         };
     }
-    setUserById(id, user) {
-    }
 }
 __decorate([
     cache_1.cache(cachingService, 0, 1000),
     repeat_1.repeatOnError(5, 100, true)
 ], UserService.prototype, "getUserById", null);
-__decorate([
-    cache_1.invalidateCache(cachingService, 0)
-], UserService.prototype, "setUserById", null);
 const us = new UserService();
 let user = us.getUserById(1);
+let cached = us.getUserById(1);
 console.log(user);
+console.log("Is cached: ", user == cached);
 //# sourceMappingURL=app.js.map
