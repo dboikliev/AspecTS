@@ -30,7 +30,7 @@ It is possible to choose only specific members using the `Target` enum.
 * Static accessors
 * Constructor
 
-## Basic aspects examples:
+## Basic Aspects Examples:
 
 #### BoundaryAspect:<a id="boundary"></a>
 
@@ -379,11 +379,6 @@ class UserService {
             name: "Ivan",
             age: 21
         };
-    }
-
-    @invalidateCache(cachingService, 0)
-    setUserById(id: number, user: User) {
-        
     }
 }
 

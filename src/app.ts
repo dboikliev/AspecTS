@@ -20,11 +20,6 @@ class UserService {
             age: 21
         };
     }
-
-    @invalidateCache(cachingService, 0)
-    setUserById(id: number, user: User) {
-        
-    }
 }
 
 interface User {
