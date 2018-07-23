@@ -405,9 +405,5 @@ In get user by id
 In get user by id
 
 Object {name: "Ivan", age: 21}
-<<<<<<< HEAD
 Is cached:  true
 ```
-=======
-```
->>>>>>> 3e75d56d11536acd4cd9d8c54bfef02ed5b2e253
