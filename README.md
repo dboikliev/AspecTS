@@ -353,7 +353,7 @@ setTimeout(() => {
 
 #### Repeating:<a id="repeating"></a>
 
-The `repeatOnError` aspect allos code to be executed a maximumg of `count` times with delays between calls of `interval` milliseconds. The repeater can be set to block until all repetitions are over by setting the `wait` parameter to `true`.
+The `repeatOnError` aspect allows code to be executed a maximumg of `count` times with delays between calls of `interval` milliseconds. The repeater can be set to block until all repetitions are over by setting the `wait` parameter to `true`.
 
 #### Example:
 
